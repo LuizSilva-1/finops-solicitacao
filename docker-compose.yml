@@ -1,0 +1,45 @@
+services:
+  db:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: finops
+      POSTGRES_PASSWORD: finops
+      POSTGRES_DB: finops
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  app:
+    build: .
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql+psycopg2://finops:finops@db:5432/finops
+      USERS_FILE: /app/data/users.json
+      PYTHONPATH: /app
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    ports:
+      - "8000:8000"
+    command: ["sh", "-c", "python -m app.scripts.prestart && alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"]
+    volumes:
+      - ./data:/app/data
+
+  worker:
+    build: .
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql+psycopg2://finops:finops@db:5432/finops
+      USERS_FILE: /app/data/users.json
+    command: ["sh", "-c", "python -m app.scripts.prestart && alembic upgrade head && python -m app.worker"]
+    volumes:
+      - ./data:/app/data
+
+volumes:
+  pgdata:

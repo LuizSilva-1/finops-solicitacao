@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin • Provisionamento FinOps</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Space+Grotesk:wght@600&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg:#0d1117; --card:#161b22; --muted:#8b949e; --text:#e6edf3; --accent:#4ade80; --danger:#f43f5e; }
+    *{box-sizing:border-box;}
+    body{margin:0;font-family:'Inter',sans-serif;background:radial-gradient(120% 120% at 10% 20%,rgba(74,222,128,0.12),transparent),var(--bg);color:var(--text);min-height:100vh;display:flex;justify-content:center;padding:32px 16px;}
+    .container{width:min(1200px,100%);}
+    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:8px;}
+    .title{font-family:'Space Grotesk',sans-serif;font-size:28px;letter-spacing:-0.02em;}
+    .subtitle{color:var(--muted);margin-top:4px;font-size:14px;}
+    .card{background:linear-gradient(145deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,0.35);}
+    input{padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:var(--text);}
+    button{border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer;transition:transform 0.08s ease, box-shadow 0.2s ease;}
+    .btn-secondary{background:rgba(255,255,255,0.08);color:var(--text);border:1px solid rgba(255,255,255,0.1);}
+    .status{margin-top:8px;padding:10px;border-radius:10px;font-size:14px;}
+    .status.error{background:rgba(244,63,94,0.12);color:#fecdd3;border:1px solid rgba(244,63,94,0.3);}
+    .status.success{background:rgba(74,222,128,0.12);color:#bbf7d0;border:1px solid rgba(74,222,128,0.3);}
+    table{width:100%;border-collapse:collapse;font-size:14px;}
+    th{color:var(--muted);text-align:left;border-bottom:1px solid rgba(255,255,255,0.08);padding:8px;}
+    td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.06);}
+    .action{margin-right:6px;padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:var(--text);}
+    @media(max-width:600px){body{padding:16px 12px;} header{flex-direction:column;align-items:flex-start;} table{font-size:13px;}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <div class="title">Painel Admin</div>
+        <div class="subtitle">Aprovar, expirar e marcar removido</div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+        <a href="/" style="color:var(--accent);text-decoration:none;font-weight:600;">← Voltar</a>
+        <div id="user-info" style="color:var(--muted);font-size:13px;"></div>
+        <button type="button" class="btn-secondary" id="login-btn">Entrar</button>
+        <button type="button" class="btn-secondary" id="logout-btn" style="display:none;">Sair</button>
+      </div>
+    </header>
+
+    <div id="login-panel" class="card" style="margin-bottom:12px; display:none;">
+      <div style="font-weight:700;margin-bottom:8px;">Login admin</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <input id="login-username" placeholder="admin">
+        <input id="login-password" type="password" placeholder="senha">
+        <button type="button" class="btn-primary" id="do-login">Login</button>
+      </div>
+      <div id="login-status" class="status" style="display:none;"></div>
+    </div>
+
+    <div class="card" style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+      <div style="font-weight:700;">Filtros:</div>
+      <input id="filter-requester" placeholder="Solicitante" />
+      <input id="filter-status" placeholder="Status (pendente/aprovado/...)" />
+      <button type="button" class="btn-secondary" id="reload-btn">Recarregar</button>
+      <button type="button" class="btn-secondary" id="add-user-btn">Criar usuário</button>
+    </div>
+
+    <div id="user-panel" class="card" style="margin-bottom:12px; display:none;">
+      <div style="font-weight:700; margin-bottom:8px;">Novo usuário</div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        <input id="new-username" placeholder="username">
+        <input id="new-password" type="password" placeholder="senha">
+        <select id="new-role">
+          <option value="user">Solicitante</option>
+          <option value="admin">Admin</option>
+        </select>
+        <input id="new-display" placeholder="Nome para exibir">
+        <button type="button" class="btn-primary" id="save-user-btn">Salvar</button>
+      </div>
+      <div id="user-status" class="status" style="display:none;"></div>
+    </div>
+
+    <div class="card">
+      <div id="list-status" class="status" style="display:none;"></div>
+      <div style="overflow:auto;">
+        <table id="requests-table">
+          <thead>
+            <tr>
+              <th>ID</th><th>Solicitante</th><th>Serviço</th><th>Conta</th><th>Região</th><th>Status</th><th>Expira</th><th>Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const listStatus = document.getElementById('list-status');
+    const tableBody = document.querySelector('#requests-table tbody');
+    const reloadBtn = document.getElementById('reload-btn');
+    const filterRequester = document.getElementById('filter-requester');
+    const filterStatus = document.getElementById('filter-status');
+
+    let authToken = localStorage.getItem('access_token') || null;
+    let refreshToken = localStorage.getItem('refresh_token') || null;
+    let currentUser = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
+
+    const loginPanel = document.getElementById('login-panel');
+    const loginBtn = document.getElementById('login-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+    const loginUsername = document.getElementById('login-username');
+    const loginPassword = document.getElementById('login-password');
+    const doLoginBtn = document.getElementById('do-login');
+    const loginStatus = document.getElementById('login-status');
+    const userInfo = document.getElementById('user-info');
+    const mainCards = document.querySelectorAll('.card:not(#login-panel)');
+    const addUserBtn = document.getElementById('add-user-btn');
+    const userPanel = document.getElementById('user-panel');
+    const saveUserBtn = document.getElementById('save-user-btn');
+    const newUsername = document.getElementById('new-username');
+    const newPassword = document.getElementById('new-password');
+    const newRole = document.getElementById('new-role');
+    const newDisplay = document.getElementById('new-display');
+    const userStatus = document.getElementById('user-status');
+
+    reloadBtn.addEventListener('click', loadRequests);
+    filterRequester.addEventListener('change', loadRequests);
+    filterStatus.addEventListener('change', loadRequests);
+    loginBtn.addEventListener('click', () => {
+      loginPanel.style.display = loginPanel.style.display === 'none' ? 'block' : 'none';
+    });
+    logoutBtn.addEventListener('click', () => {
+      authToken = null;
+      refreshToken = null;
+      currentUser = null;
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user');
+      updateAuthUI();
+      tableBody.innerHTML = '<tr><td colspan="8" style="padding:12px;color:var(--danger);">Faça login como admin.</td></tr>';
+    });
+    doLoginBtn.addEventListener('click', async () => {
+      loginStatus.style.display = 'none';
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: loginUsername.value, password: loginPassword.value })
+        });
+        if (!res.ok) throw new Error('Credenciais inválidas');
+        const data = await res.json();
+        authToken = data.access_token;
+        refreshToken = data.refresh_token;
+        currentUser = data.user;
+        localStorage.setItem('access_token', authToken);
+        localStorage.setItem('refresh_token', refreshToken);
+        localStorage.setItem('user', JSON.stringify(currentUser));
+        loginPanel.style.display = 'none';
+        updateAuthUI();
+        loadRequests();
+      } catch (err) {
+        loginStatus.textContent = err.message;
+        loginStatus.className = 'status error';
+        loginStatus.style.display = 'block';
+      }
+    });
+
+    addUserBtn.addEventListener('click', () => {
+      if (!currentUser || currentUser.role !== 'admin') {
+        alert('Apenas admin pode criar usuários');
+        return;
+      }
+      userPanel.style.display = userPanel.style.display === 'none' ? 'block' : 'none';
+    });
+
+    saveUserBtn.addEventListener('click', async () => {
+      userStatus.style.display = 'none';
+      if (!authToken) {
+        userStatus.textContent = 'Faça login como admin';
+        userStatus.className = 'status error';
+        userStatus.style.display = 'block';
+        return;
+      }
+      try {
+        const res = await fetch('/api/auth/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Auth-Token': authToken },
+          body: JSON.stringify({
+            username: newUsername.value,
+            password: newPassword.value,
+            role: newRole.value,
+            display: newDisplay.value
+          })
+        });
+        if (!res.ok) {
+          const txt = await res.text();
+          throw new Error(txt || 'Erro ao criar usuário');
+        }
+        userStatus.textContent = 'Usuário criado com sucesso';
+        userStatus.className = 'status success';
+        userStatus.style.display = 'block';
+        newUsername.value = '';
+        newPassword.value = '';
+        newDisplay.value = '';
+      } catch (err) {
+        userStatus.textContent = err.message;
+        userStatus.className = 'status error';
+        userStatus.style.display = 'block';
+      }
+    });
+
+    function showListStatus(message, type) {
+      listStatus.textContent = message;
+      listStatus.className = 'status ' + type;
+      listStatus.style.display = 'block';
+    }
+
+    async function loadRequests() {
+      if (!currentUser || currentUser.role !== 'admin') {
+        tableBody.innerHTML = '<tr><td colspan="8" style="padding:12px;color:var(--danger);">Restrito a admin. Faça login como admin.</td></tr>';
+        return;
+      }
+      listStatus.style.display = 'none';
+      tableBody.innerHTML = '<tr><td colspan="8" style="padding:12px;color:var(--muted);">Carregando...</td></tr>';
+      try {
+        const params = new URLSearchParams();
+        if (filterRequester.value.trim()) params.append('requester', filterRequester.value.trim());
+        if (filterStatus.value.trim()) params.append('status', filterStatus.value.trim());
+        const url = params.toString() ? `/api/requests?${params.toString()}` : '/api/requests';
+        const res = await fetch(url, { headers: authToken ? { 'X-Auth-Token': authToken } : {} });
+        if (res.status === 401) { tableBody.innerHTML = '<tr><td colspan="8" style="padding:12px;color:var(--danger);">Faça login como admin.</td></tr>'; return; }
+        if (!res.ok) throw new Error('Erro ao listar solicitações');
+        const data = await res.json();
+        if (!data.length) {
+          tableBody.innerHTML = '<tr><td colspan="8" style="padding:12px;color:var(--muted);">Nenhuma solicitação.</td></tr>';
+          return;
+        }
+        tableBody.innerHTML = '';
+        data.forEach(item => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${item.id.slice(0,8)}</td>
+            <td>${item.requester}</td>
+            <td>${item.service_type}</td>
+            <td>${item.aws_account || '-'}</td>
+            <td>${item.region || '-'}</td>
+            <td>${item.status}</td>
+            <td>${item.expires_at}</td>
+            <td>
+              <button data-id="${item.id}" class="action approve">Aprovar</button>
+              <button data-id="${item.id}" class="action expire">Expirar</button>
+              <button data-id="${item.id}" class="action remove">Removido</button>
+            </td>
+          `;
+          tableBody.appendChild(tr);
+        });
+        attachActionHandlers();
+      } catch (err) {
+        showListStatus(err.message, 'error');
+      }
+    }
+
+    function attachActionHandlers() {
+      document.querySelectorAll('.action.approve').forEach(btn => {
+        btn.onclick = () => updateStatus(btn.dataset.id, 'aprovado');
+      });
+      document.querySelectorAll('.action.expire').forEach(btn => {
+        btn.onclick = () => expireRequest(btn.dataset.id);
+      });
+      document.querySelectorAll('.action.remove').forEach(btn => {
+        btn.onclick = () => {
+          const remover = prompt('Quem removeu? (nome ou email)');
+          if (remover) markRemoved(btn.dataset.id, remover);
+        };
+      });
+    }
+
+    async function updateStatus(id, status) {
+      try {
+        const res = await fetch(`/api/requests/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'X-Auth-Token': authToken || '' },
+          body: JSON.stringify({ status })
+        });
+        if (!res.ok) throw new Error('Falha ao atualizar status');
+        await loadRequests();
+      } catch (err) {
+        showListStatus(err.message, 'error');
+      }
+    }
+
+    async function expireRequest(id) {
+      try {
+        const res = await fetch(`/api/requests/${id}/expire`, { method: 'POST', headers: { 'X-Auth-Token': authToken || '' } });
+        if (!res.ok) throw new Error('Falha ao expirar');
+        await loadRequests();
+      } catch (err) {
+        showListStatus(err.message, 'error');
+      }
+    }
+
+    async function markRemoved(id, remover) {
+      try {
+        const res = await fetch(`/api/requests/${id}/mark-removed`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Auth-Token': authToken || '' },
+          body: JSON.stringify({ remover })
+        });
+        if (!res.ok) throw new Error('Falha ao marcar removido');
+        await loadRequests();
+      } catch (err) {
+        showListStatus(err.message, 'error');
+      }
+    }
+
+    updateAuthUI();
+    loadRequests();
+
+    function updateAuthUI() {
+      if (currentUser && currentUser.role === 'admin') {
+        userInfo.textContent = `${currentUser.display_name} (${currentUser.role})`;
+        loginBtn.textContent = 'Trocar usuário';
+        logoutBtn.style.display = 'inline-block';
+        loginPanel.style.display = 'none';
+        mainCards.forEach(c => c.style.display = 'block');
+      } else {
+        userInfo.textContent = '';
+        loginBtn.textContent = 'Entrar';
+        logoutBtn.style.display = 'none';
+        loginPanel.style.display = 'block';
+        mainCards.forEach((c) => { c.style.display = 'none'; });
+        tableBody.innerHTML = '<tr><td colspan="8" style="padding:12px;color:var(--danger);">Restrito a admin. Faça login.</td></tr>';
+      }
+    }
+  </script>
+</body>
+</html>

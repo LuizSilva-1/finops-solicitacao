@@ -1,0 +1,2 @@
+requester,service_type,aws_account,region,expires_at,status,params,tags
+usuario,ebs_snapshot,123456789012,sa-east-1,2026-01-01,pendente,"Snapshot do volume vol-123 tamanho 100GB","Owner=usuario;CostCenter=CC123;Project=ProjetoX"
