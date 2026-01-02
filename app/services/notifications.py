@@ -1,19 +1,21 @@
 import json
 import urllib.request
 import logging
+from typing import Optional
 from app.core.config import get_settings
 
 logger = logging.getLogger("notifications")
 
 
-def send_webhook(text: str) -> None:
+def send_webhook(text: str, channel: Optional[str] = None) -> None:
     settings = get_settings()
     if not settings.webhook_url:
         logger.info("Webhook skipped: WEBHOOK_URL not set")
         return
     payload = {"text": text}
-    if settings.webhook_channel:
-        payload["channel"] = settings.webhook_channel
+    target_channel = channel or settings.webhook_channel
+    if target_channel:
+        payload["channel"] = target_channel
     if settings.webhook_username:
         payload["username"] = settings.webhook_username
     req = urllib.request.Request(

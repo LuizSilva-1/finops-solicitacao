@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Solicitação de Provisionamento FinOps</title>
+  <title>GMUD FinOps</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Space+Grotesk:wght@600&display=swap" rel="stylesheet">
@@ -66,6 +66,8 @@
       margin-bottom: 4px;
       color: #cdd6e0;
     }
+    .other-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:10px; }
+    .other-grid textarea, .other-grid input { width:100%; }
     input, select, textarea {
       width: 100%;
       padding: 10px 12px;
@@ -156,10 +158,10 @@
     .btn-approve { background: rgba(34,197,94,0.12); border-color: rgba(34,197,94,0.25); color: #c8facc; }
     .btn-danger { background: rgba(244,63,94,0.12); border-color: rgba(244,63,94,0.25); color: #fecdd3; }
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); display: none; align-items: center; justify-content: center; padding: 16px; z-index: 1000; }
-    .modal { background: #0f141c; border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; max-width: 560px; width: 100%; box-shadow: 0 24px 60px rgba(0,0,0,0.65); }
+    .modal { background: #0f141c; border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; max-width: 720px; width: 100%; max-height: 90vh; overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,0.65); display:flex; flex-direction:column; }
     .modal-header { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; }
     .modal-title { font-weight: 700; letter-spacing: -0.01em; }
-    .modal-body { padding: 16px 20px 20px 20px; color: #e5e7eb; display: grid; gap: 10px; }
+    .modal-body { padding: 16px 20px 20px 20px; color: #e5e7eb; display: grid; gap: 10px; overflow-y: auto; flex:1; }
     .modal-close { background: none; border: none; color: #e5e7eb; font-size: 18px; cursor: pointer; }
     .detail-item { padding: 10px 12px; border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; background: rgba(255,255,255,0.03); }
     .detail-label { font-weight: 700; color: #cbd5e1; font-size: 13px; display:block; margin-bottom:4px; text-transform: uppercase; letter-spacing: 0.02em; }
@@ -185,72 +187,72 @@
   <div class="container">
     <header>
       <div>
-        <div class="title">Registro de Provisionamento</div>
+        <div class="title">Registro de Mudanças</div>
         <div class="subtitle">Controle FinOps local • sem automação na nuvem</div>
       </div>
       <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
         <div id="user-info" style="color:var(--muted);font-size:13px;"></div>
-        <button type="button" class="btn-secondary" id="login-btn">Entrar</button>
+        <button type="button" class="btn-secondary" id="create-user-btn" style="display:none;">Criar usuário</button>
         <button type="button" class="btn-secondary" id="logout-btn" style="display:none;">Sair</button>
       </div>
     </header>
 
     <div id="login-panel" class="card" style="margin-bottom:16px;">
-      <div style="font-weight:700;margin-bottom:8px;">Entrar</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <input id="login-username" placeholder="usuario ou admin">
-        <input id="login-password" type="password" placeholder="senha">
-        <button type="button" class="btn-primary" id="do-login">Login</button>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <div>
+          <div style="font-weight:700;">Acesso</div>
+          <div style="color:var(--muted);font-size:12px;">Use seu usuário para registrar mudanças.</div>
+        </div>
       </div>
-      <div id="login-status" class="status" style="display:none;"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <input id="login-username" placeholder="usuario ou admin" style="flex:1 1 180px;">
+        <input id="login-password" type="password" placeholder="senha" style="flex:1 1 180px;">
+        <button type="button" class="btn-primary" id="do-login" style="min-width:160px;">Acessar painel</button>
+      </div>
+      <div id="login-status" class="status" style="display:none;margin-top:8px;"></div>
+    </div>
+
+    <div id="login-info" class="layout-row" style="margin-bottom:16px; display:grid; gap:12px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));">
+      <div class="card">
+        <div style="font-weight:700;margin-bottom:6px;">FinOps na AWS</div>
+        <div style="color:var(--muted);font-size:13px;line-height:1.5;">
+          - Cada provisionamento registra dono, conta, região e previsão de custo para revisar antes da fatura.<br>
+          - Expiração e tempo de uso evitam esqueletos caros rodando para sempre.<br>
+          - Admin aprova/reprova com notas e mantém histórico para auditoria e rateio.
+        </div>
+      </div>
+      <div class="card">
+        <div style="font-weight:700;margin-bottom:6px;">DevOps e Governança</div>
+        <div style="color:var(--muted);font-size:13px;line-height:1.5;">
+          - Abra a mudança antes do deploy, com justificativa, riscos e rollback documentados.<br>
+          - Fluxo “Outros” cobre mudanças que não são AWS, sem perder aprovação e rastreabilidade.<br>
+          - Painel único com status, custos (opcional) e log de decisões para o time inteiro.
+        </div>
+      </div>
     </div>
 
     <div id="protected-section" style="display:none;">
-      <div class="layout-row">
+      <div class="layout-row" style="align-items:flex-start;">
         <div class="filters-col" id="side-stack">
-          <div class="card" id="form-card">
-            <form id="request-form">
-              <div>
-                <label for="requester">Solicitante *</label>
-                <input id="requester" name="requester" required placeholder="nome@empresa.com">
-              </div>
-              <div>
-                <label for="service_type">Serviço *</label>
-                <select id="service_type" name="service_type" required></select>
-              </div>
-              <div>
-                <label for="aws_account">Conta AWS *</label>
-                <select id="aws_account" name="aws_account" required></select>
-              </div>
-              <div>
-                <label for="region">Região *</label>
-                <select id="region" name="region" required></select>
-              </div>
-              <div>
-                <label for="expires_at">Data de remoção *</label>
-                <input id="expires_at" name="expires_at" type="date" required>
-              </div>
-              <div>
-                <label for="retention_days">Tempo de uso (dias)</label>
-                <input id="retention_days" name="retention_days" type="number" min="1" placeholder="ex.: 30">
-              </div>
-              <div class="full">
-                <label for="params">Detalhes do recurso (texto livre)</label>
-                <textarea id="params" name="params" placeholder="Ex.: Snapshot do volume vol-123 tamanho 200GB, encrypted com KMS X."></textarea>
-              </div>
-              <div class="full">
-                <label for="tags">Tags principais (texto livre)</label>
-                <textarea id="tags" name="tags" placeholder="Owner=nome@empresa.com; CostCenter=CC123; Project=ProjetoX; ExpiresAt=2025-02-15"></textarea>
-              </div>
-              <div class="actions">
-                <button type="button" class="btn-secondary" id="reset-btn">Limpar</button>
-                <button type="submit" class="btn-primary">Enviar solicitação</button>
-              </div>
-              <div id="status" class="status" style="display:none;"></div>
-            </form>
+          <div class="card" id="finops-card" style="margin-bottom:12px; cursor:pointer;">
+            <div style="font-weight:700;margin-bottom:6px;">FinOps</div>
+            <div id="finops-body" style="color:var(--muted); font-size:13px; line-height:1.4;">
+              Clique para ver como ligamos custo previsto, dono e expiração para controlar gastos.
+            </div>
           </div>
-
-          <div class="card" id="filters-card" style="margin-top:16px;">
+          <div class="card" id="gmud-card" style="margin-bottom:12px; cursor:pointer;">
+            <div style="font-weight:700;margin-bottom:6px;">Governança</div>
+            <div id="gmud-body" style="color:var(--muted); font-size:13px; line-height:1.4;">
+              Clique para ver como a mudança segue aprovação/justificativa/auditoria.
+            </div>
+          </div>
+          <div class="card" id="devops-card" style="margin-bottom:12px; cursor:pointer;">
+            <div style="font-weight:700;margin-bottom:6px;">DevOps</div>
+            <div id="devops-body" style="color:var(--muted); font-size:13px; line-height:1.4;">
+              Clique para ver como o fluxo se encaixa no ciclo DevOps (CI/CD, release).
+            </div>
+          </div>
+          <div class="card" id="filters-card" style="margin-top:8px;">
             <div style="font-weight:700;margin-bottom:8px;">Filtros e busca</div>
             <div class="filter-stack">
               <input id="viewer" placeholder="Seu nome ou e-mail para filtrar" style="padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:var(--text);">
@@ -273,13 +275,126 @@
             </div>
           </div>
         </div>
-
         <div class="list-col">
+          <div class="card" id="form-card" style="margin-bottom:16px;">
+            <form id="request-form">
+              <div class="full">
+                <label for="flow_type">Tipo de fluxo *</label>
+                <select id="flow_type" name="flow_type" required>
+                  <option value="finops" selected>FinOps (custo/expiração)</option>
+                  <option value="outros">Outros (template corporativo)</option>
+                </select>
+              </div>
+              <div>
+                <label for="service_type">Serviço *</label>
+                <select id="service_type" name="service_type" required></select>
+              </div>
+              <div>
+                <label for="aws_account">Conta AWS *</label>
+                <select id="aws_account" name="aws_account" required></select>
+              </div>
+              <div>
+                <label for="region">Região *</label>
+                <select id="region" name="region" required></select>
+              </div>
+              <div>
+                <label for="retention_days">Tempo de uso (dias)</label>
+                <input id="retention_days" name="retention_days" type="number" min="1" placeholder="ex.: 30">
+              </div>
+              <div>
+                <label for="change_type">Tipo de mudança *</label>
+                <select id="change_type" name="change_type" required>
+                  <option value="" disabled selected>Selecione</option>
+                  <option value="provisionamento">Provisionamento temporário</option>
+                  <option value="backup">Snapshot/Backup</option>
+                  <option value="encerramento">Encerramento/Remoção</option>
+                  <option value="padrao">Mudança padrão</option>
+                  <option value="outro">Outro</option>
+                </select>
+              </div>
+              <div>
+                <label for="criticality">Criticidade *</label>
+                <select id="criticality" name="criticality" required>
+                  <option value="" disabled selected>Selecione</option>
+                  <option value="baixa">Baixa</option>
+                  <option value="media">Média</option>
+                  <option value="alta">Alta</option>
+                </select>
+              </div>
+              <div class="full">
+                <label for="justification">Justificativa/benefício *</label>
+                <textarea id="justification" name="justification" required placeholder="Por que a mudança é necessária? Benefícios, riscos, janela."></textarea>
+              </div>
+              <div>
+                <label for="estimated_cost">Custo previsto (R$)</label>
+                <input id="estimated_cost" name="estimated_cost" type="text" placeholder="ex.: 500">
+              </div>
+              <div class="full" id="other-questions" style="display:none; border:1px solid rgba(255,255,255,0.08); padding:12px; border-radius:12px;">
+                <div style="margin-bottom:8px; font-weight:700; color:#cbd5e1;">Perguntas para outros fluxos</div>
+                <div class="other-grid">
+                  <div>
+                    <label for="oq_desc">O que será mudado?</label>
+                    <textarea id="oq_desc" placeholder="Descrição da mudança, objetivo, impacto positivo/negativo."></textarea>
+                  </div>
+                  <div>
+                    <label for="oq_urgencia">Urgência/criticidade</label>
+                    <textarea id="oq_urgencia" placeholder="Normal ou emergencial? Urgência e impacto se falhar."></textarea>
+                  </div>
+                  <div>
+                    <label for="oq_riscos">Riscos e serviços afetados</label>
+                    <textarea id="oq_riscos" placeholder="Riscos, serviços parados/degradados, backup/rollback previsto."></textarea>
+                  </div>
+                  <div>
+                    <label for="oq_chamado">Chamado relacionado</label>
+                    <input id="oq_chamado" placeholder="ID da ocorrência/chamado (se houver)">
+                  </div>
+                  <div>
+                    <label for="quem_exec">Quem executa/aprova</label>
+                    <textarea id="quem_exec" placeholder="Executor, consultor técnico, aprovador, homologador/validador."></textarea>
+                  </div>
+                  <div>
+                    <label for="quem_afetados">Quem é afetado/comunicado</label>
+                    <textarea id="quem_afetados" placeholder="Equipes, clientes, parceiros; como comunicar."></textarea>
+                  </div>
+                  <div>
+                    <label for="quando_exec">Quando será executada</label>
+                    <textarea id="quando_exec" placeholder="Data/hora, janela de parada, aprovação prévia."></textarea>
+                  </div>
+                  <div>
+                    <label for="quanto_roi">Custo/ROI esperado</label>
+                    <textarea id="quanto_roi" placeholder="Custo financeiro, economia/ROI almejada."></textarea>
+                  </div>
+                  <div>
+                    <label for="onde_ativos">Onde/como executar</label>
+                    <textarea id="onde_ativos" placeholder="Ativos afetados, de onde será executada a mudança."></textarea>
+                  </div>
+                  <div>
+                    <label for="como_passos">Como aplicar/rollback</label>
+                    <textarea id="como_passos" placeholder="Passos macro, testes/labs, rollback e comunicação."></textarea>
+                  </div>
+                </div>
+              </div>
+              <div class="full">
+                <label for="params">Detalhes da mudança (texto livre)</label>
+                <textarea id="params" name="params" placeholder="Ex.: Snapshot do volume vol-123 tamanho 200GB, encrypted com KMS X."></textarea>
+              </div>
+              <div class="full">
+                <label for="tags">Tags principais (texto livre)</label>
+                <textarea id="tags" name="tags" placeholder="Owner=nome@empresa.com; CostCenter=CC123; Project=ProjetoX; ExpiresAt=2025-02-15"></textarea>
+              </div>
+              <div class="actions">
+                <button type="button" class="btn-secondary" id="reset-btn">Limpar</button>
+                <button type="submit" class="btn-primary">Enviar mudança</button>
+              </div>
+              <div id="status" class="status" style="display:none;"></div>
+            </form>
+          </div>
+
           <div class="card" id="list-card">
             <div id="summary" class="summary-grid" style="display:none;"></div>
             <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
               <div>
-                <div id="requests-title" style="font-weight:700;">Minhas solicitações</div>
+                <div id="requests-title" style="font-weight:700;">Minhas mudanças</div>
                 <div style="color:var(--muted);font-size:13px;">Histórico e aprovação</div>
               </div>
             </div>
@@ -313,12 +428,17 @@
     <div class="modal">
       <div class="modal-header">
         <div>
-          <div class="modal-title" id="detail-title">Detalhes da solicitação</div>
+          <div class="modal-title" id="detail-title">Detalhes da mudança</div>
           <div style="margin-top:6px;"><span class="chip" id="detail-status-chip"></span></div>
         </div>
         <button class="modal-close" id="modal-close">&times;</button>
       </div>
       <div class="modal-body">
+        <div class="detail-item"><span class="detail-label">Tipo</span> <span class="detail-value" id="detail-change-type">-</span></div>
+        <div class="detail-item"><span class="detail-label">Criticidade</span> <span class="detail-value" id="detail-criticality">-</span></div>
+        <div class="detail-item"><span class="detail-label">Justificativa</span> <span class="detail-value" id="detail-justification">-</span></div>
+        <div class="detail-item"><span class="detail-label">Notas/aprovação</span> <span class="detail-value" id="detail-notes">-</span></div>
+        <div class="detail-item"><span class="detail-label">Outros fluxos</span> <span class="detail-value" id="detail-other">-</span></div>
         <div class="detail-item"><span class="detail-label">Params</span> <span class="detail-value" id="detail-params">-</span></div>
         <div class="detail-item"><span class="detail-label">Tags</span> <span class="detail-value" id="detail-tags">-</span></div>
         <div class="detail-item"><span class="detail-label">Custo estimado</span> <span class="detail-value" id="detail-cost">-</span></div>
@@ -354,52 +474,100 @@
     const loginPanel = document.getElementById('login-panel');
     const loginBtn = document.getElementById('login-btn');
     const logoutBtn = document.getElementById('logout-btn');
+    const createUserBtn = document.getElementById('create-user-btn');
     const loginUsername = document.getElementById('login-username');
     const loginPassword = document.getElementById('login-password');
     const doLoginBtn = document.getElementById('do-login');
     const loginStatus = document.getElementById('login-status');
     const userInfo = document.getElementById('user-info');
+    const loginInfo = document.getElementById('login-info');
     const protectedSection = document.getElementById('protected-section');
     const sideStack = document.getElementById('side-stack');
-    const userPanel = document.createElement('div');
-    userPanel.className = 'card';
-    userPanel.style.marginTop = '12px';
-    userPanel.style.display = 'none';
-    userPanel.innerHTML = `
-      <div style="font-weight:700;margin-bottom:8px;">Criar usuário (admin)</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-        <input id="new-username" placeholder="username">
-        <input id="new-password" type="password" placeholder="senha">
-        <select id="new-role">
-          <option value="user">Solicitante</option>
-          <option value="admin">Admin</option>
-        </select>
-        <input id="new-display" placeholder="Nome para exibir">
-        <button type="button" class="btn-primary" id="save-user-btn">Salvar</button>
-        <button type="button" class="btn-secondary" id="import-btn">Importar CSV</button>
+    const userPanel = null;
+    const finopsCard = document.getElementById('finops-card');
+    const finopsBody = document.getElementById('finops-body');
+    const gmudCard = document.getElementById('gmud-card');
+    const gmudBody = document.getElementById('gmud-body');
+    const devopsCard = document.getElementById('devops-card');
+    const devopsBody = document.getElementById('devops-body');
+    const userStatus = document.createElement('div');
+    userStatus.id = 'user-status';
+    userStatus.className = 'status';
+    userStatus.style.display = 'none';
+    sideStack.appendChild(userStatus);
+    const userModalOverlay = document.createElement('div');
+    userModalOverlay.className = 'modal-overlay';
+    userModalOverlay.style.zIndex = '1100';
+    userModalOverlay.innerHTML = `
+      <div class="modal" style="max-width:480px;">
+        <div class="modal-header">
+          <div class="modal-title">Criar usuário</div>
+          <button class="modal-close" id="user-modal-close">&times;</button>
+        </div>
+        <div class="modal-body" style="display:grid;gap:10px;overflow:auto;max-height:70vh;">
+          <input id="new-username" placeholder="username">
+          <input id="new-password" type="password" placeholder="senha">
+          <select id="new-role">
+            <option value="user">Solicitante</option>
+            <option value="admin">Admin</option>
+          </select>
+          <input id="new-display" placeholder="Nome para exibir">
+          <input id="new-email" placeholder="email (opcional)">
+          <button type="button" class="btn-primary" id="save-user-btn">Salvar</button>
+          <button type="button" class="btn-secondary" id="import-btn">Importar CSV</button>
+        </div>
       </div>
-      <div id="user-status" class="status" style="display:none;"></div>
     `;
-    sideStack.appendChild(userPanel);
-    const saveUserBtn = userPanel.querySelector('#save-user-btn');
-    const newUsername = userPanel.querySelector('#new-username');
-    const newPassword = userPanel.querySelector('#new-password');
-    const newRole = userPanel.querySelector('#new-role');
-    const newDisplay = userPanel.querySelector('#new-display');
-    const userStatus = userPanel.querySelector('#user-status');
-    const importBtn = userPanel.querySelector('#import-btn');
+    document.body.appendChild(userModalOverlay);
+    const saveUserBtn = userModalOverlay.querySelector('#save-user-btn');
+    const newUsername = userModalOverlay.querySelector('#new-username');
+    const newPassword = userModalOverlay.querySelector('#new-password');
+    const newRole = userModalOverlay.querySelector('#new-role');
+    const newDisplay = userModalOverlay.querySelector('#new-display');
+    const importBtn = userModalOverlay.querySelector('#import-btn');
+    const userModalClose = userModalOverlay.querySelector('#user-modal-close');
+    const userModalEmail = userModalOverlay.querySelector('#new-email');
     const modalOverlay = document.getElementById('modal-overlay');
     const modalClose = document.getElementById('modal-close');
+    const estimatedCostField = document.getElementById('estimated_cost')?.parentElement;
+    const otherFields = [
+      'oq_desc','oq_urgencia','oq_riscos','oq_chamado',
+      'quem_exec','quem_afetados','quando_exec','quanto_roi',
+      'onde_ativos','como_passos'
+    ].map(id => document.getElementById(id));
+    const finopsSpecific = [
+      document.getElementById('service_type')?.parentElement,
+      document.getElementById('aws_account')?.parentElement,
+      document.getElementById('region')?.parentElement,
+      document.getElementById('change_type')?.parentElement,
+      document.getElementById('criticality')?.parentElement,
+      document.getElementById('estimated_cost')?.parentElement,
+    ].filter(Boolean);
     const detailParams = document.getElementById('detail-params');
     const detailTags = document.getElementById('detail-tags');
     const detailCost = document.getElementById('detail-cost');
     const detailResource = document.getElementById('detail-resource');
+    const detailChangeType = document.getElementById('detail-change-type');
+    const detailCriticality = document.getElementById('detail-criticality');
+    const detailJustification = document.getElementById('detail-justification');
+    const detailNotes = document.getElementById('detail-notes');
+    const detailOther = document.getElementById('detail-other');
+    const detailChangeTypeBlock = detailChangeType?.parentElement;
+    const detailCriticalityBlock = detailCriticality?.parentElement;
+    const detailJustificationBlock = detailJustification?.parentElement;
+    const detailOtherBlock = detailOther?.parentElement;
+    const detailParamsBlock = detailParams?.parentElement;
+    const detailTagsBlock = detailTags?.parentElement;
+    const detailCostBlock = detailCost?.parentElement;
+    const detailResourceBlock = detailResource?.parentElement;
     const summaryContainer = document.getElementById('summary');
     const importInput = document.createElement('input');
     importInput.type = 'file';
     importInput.accept = '.csv';
     importInput.style.display = 'none';
     document.body.appendChild(importInput);
+    const flowTypeSelect = document.getElementById('flow_type');
+    const otherQuestions = document.getElementById('other-questions');
 
     let requesterFilter = '';
     let authToken = localStorage.getItem('access_token') || null;
@@ -429,6 +597,63 @@
       }, duration);
     }
 
+    if (finopsCard && finopsBody) {
+      let finopsOpen = false;
+      const text = `FinOps resumido: liga custo previsto, dono e expiração para controlar gastos. `
+        + `Use para registrar quem cria e quando revisar/remover.`;
+      finopsCard.addEventListener('click', () => {
+        finopsOpen = !finopsOpen;
+        finopsBody.textContent = finopsOpen
+          ? text
+          : 'Clique para ver como ligamos custo previsto, dono e expiração para controlar gastos.';
+      });
+    }
+    if (gmudCard && gmudBody) {
+      let gmudOpen = false;
+      const gmudText = `Governança: registre justificativa, aprovador e auditoria. `
+        + `Use para manter conformidade, riscos e comunicação sob controle.`;
+      gmudCard.addEventListener('click', () => {
+        gmudOpen = !gmudOpen;
+        gmudBody.textContent = gmudOpen
+          ? gmudText
+          : 'Clique para ver como a mudança segue aprovação/justificativa/auditoria.';
+      });
+    }
+    if (devopsCard && devopsBody) {
+      let devopsOpen = false;
+      const devText = `DevOps: o registro da mudança ajuda a alinhar CI/CD e release management. `
+        + `Use para comunicar janela, riscos, rollback e partes envolvidas, mantendo rastreabilidade.`;
+      devopsCard.addEventListener('click', () => {
+        devopsOpen = !devopsOpen;
+        devopsBody.textContent = devopsOpen
+          ? devText
+          : 'Clique para ver como o fluxo se encaixa no ciclo DevOps (CI/CD, release).';
+      });
+    }
+    if (flowTypeSelect && otherQuestions) {
+      const toggleOther = () => {
+        if (flowTypeSelect.value === 'outros') {
+          otherQuestions.style.display = 'block';
+          finopsSpecific.forEach(el => el.style.display = 'none');
+          document.getElementById('service_type')?.removeAttribute('required');
+          document.getElementById('region')?.removeAttribute('required');
+          document.getElementById('aws_account')?.removeAttribute('required');
+          document.getElementById('change_type')?.removeAttribute('required');
+          document.getElementById('criticality')?.removeAttribute('required');
+        } else {
+          otherQuestions.style.display = 'none';
+          finopsSpecific.forEach(el => el.style.display = 'block');
+          document.getElementById('service_type')?.setAttribute('required','true');
+          document.getElementById('region')?.setAttribute('required','true');
+          document.getElementById('aws_account')?.setAttribute('required','true');
+          document.getElementById('change_type')?.setAttribute('required','true');
+          document.getElementById('criticality')?.setAttribute('required','true');
+        }
+      };
+      flowTypeSelect.addEventListener('change', toggleOther);
+      toggleOther();
+    }
+
     function safeAttr(value) {
       if (!value) return '';
       return String(value).replace(/"/g, '&quot;');
@@ -453,9 +678,15 @@
         data-account="${safeAttr(item.aws_account || '-')}"
         data-region="${safeAttr(item.region || '-')}"
         data-exp="${safeAttr(item.expires_at)}"
+        data-flow="${safeAttr(item.flow_type || 'finops')}"
+        data-change_type="${safeAttr(item.change_type || '-')}"
+        data-justification="${safeAttr(item.justification || '-')}"
+        data-criticality="${safeAttr(item.criticality || '-')}"
         data-params="${safeAttr(item.params || '')}"
         data-tags="${safeAttr(item.tags || '')}"
         data-cost="${safeAttr(item.estimated_cost || '')}"
+        data-notes="${safeAttr(item.approval_notes || '')}"
+        data-other="${safeAttr(JSON.stringify(item.other_payload || {}))}"
         data-resource="${safeAttr(item.resource_id || '')}"`;
     }
 
@@ -463,11 +694,9 @@
       const defaultsServices = ['ebs_snapshot','ec2','elb','s3','rds_snapshot','outro'];
       const defaultsRegions = ['sa-east-1','us-east-1'];
       try {
-        const data = await withAuth(async (token) => {
-          const res = await fetch('/api/meta', { headers: token ? { 'X-Auth-Token': token } : {} });
-          if (!res.ok) throw new Error('Erro ao carregar metadados');
-          return res.json();
-        });
+        const res = await fetch('/api/meta', { headers: authToken ? { 'X-Auth-Token': authToken } : {} });
+        if (!res.ok) throw new Error('fail');
+        const data = await res.json();
         populateSelect(serviceTypeSelect, (data.allowed_services && data.allowed_services.length ? data.allowed_services : defaultsServices), 'Selecione');
         populateSelect(regionSelect, (data.allowed_regions && data.allowed_regions.length ? data.allowed_regions : defaultsRegions), 'Selecione');
         if (data.allowed_accounts && data.allowed_accounts.length) {
@@ -487,7 +716,6 @@
           accountSelect = input;
         }
       } catch {
-        // fallback silencioso com defaults
         populateSelect(serviceTypeSelect, defaultsServices, 'Selecione');
         populateSelect(regionSelect, defaultsRegions, 'Selecione');
         const input = document.createElement('input');
@@ -526,73 +754,97 @@
       statusEl.style.display = 'none';
 
       if (!authToken) {
-        showStatus('Faça login para enviar solicitação.', 'error');
+        showStatus('Faça login para enviar a mudança.', 'error');
         return;
       }
 
+      const expiresInput = form.querySelector('#expires_at');
       const payload = {
-        service_type: form.service_type.value,
-        aws_account: form.aws_account.value,
-        region: form.region.value,
-        expires_at: form.expires_at.value,
+        flow_type: form.flow_type.value,
+        service_type: form.flow_type.value === 'outros' ? 'outro' : form.service_type.value,
+        aws_account: form.flow_type.value === 'outros' ? null : form.aws_account.value,
+        region: form.flow_type.value === 'outros' ? null : form.region.value,
+        expires_at: expiresInput ? (expiresInput.value || null) : null,
         retention_days: form.retention_days.value ? Number(form.retention_days.value) : null,
+        change_type: form.change_type.value,
+        justification: form.justification.value,
+        criticality: form.criticality.value,
+        estimated_cost: form.estimated_cost.value || null,
         params: form.params.value || null,
         tags: form.tags.value || null
       };
+      if (payload.flow_type === 'outros' && otherFields) {
+        const other_payload = {};
+        [
+          'oq_desc','oq_urgencia','oq_riscos','oq_chamado',
+          'quem_exec','quem_afetados','quando_exec','quanto_roi',
+          'onde_ativos','como_passos'
+        ].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el && el.value) other_payload[id] = el.value;
+        });
+        payload.other_payload = Object.keys(other_payload).length ? other_payload : null;
+      }
 
       try {
-        await withAuth(async (token) => {
-          const res = await fetch('/api/requests', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-Auth-Token': token },
-            body: JSON.stringify(payload)
-          });
+      await withAuth(async (token) => {
+        const res = await fetch('/api/requests', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Auth-Token': token },
+          body: JSON.stringify(payload)
+        });
           if (!res.ok) {
-            let errMsg = 'Erro ao criar solicitação';
+            let errMsg = 'Erro ao registrar a mudança';
+            const raw = await res.text();
             try {
-              const data = await res.json();
-              errMsg = data.detail || JSON.stringify(data);
+              const data = raw ? JSON.parse(raw) : null;
+              if (data && data.detail) errMsg = data.detail;
+              else if (raw) errMsg = raw;
             } catch {
-              const text = await res.text();
-              if (text) errMsg = text;
+              if (raw) errMsg = raw;
             }
             throw new Error(errMsg);
           }
           const data = await res.json();
-          toast('Solicitação criada. ID: ' + data.id, 'success');
-          showStatus('Solicitação enviada para aprovação.', 'success');
+          toast('Mudança criada. ID: ' + data.id, 'success');
+          showStatus('Mudança enviada para aprovação.', 'success');
           form.reset();
+          if (flowTypeSelect) flowTypeSelect.value = 'finops';
+          if (otherQuestions) otherQuestions.style.display = 'none';
+          otherFields.forEach((el) => { if (el) el.value = ''; });
         });
       } catch (err) {
-        const msg = err && err.message ? err.message : 'Erro ao criar solicitação';
+        const msg = err && err.message ? err.message : 'Erro ao registrar a mudança';
         showStatus(msg, 'error');
         toast(msg, 'error');
       }
     });
 
-    resetBtn.addEventListener('click', () => {
-      form.reset();
-      statusEl.style.display = 'none';
-    });
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        form.reset();
+        statusEl.style.display = 'none';
+      });
+    }
 
-    reloadBtn.addEventListener('click', () => loadRequests(1));
-    filterStatus.addEventListener('change', () => loadRequests(1));
-    filterExpBefore.addEventListener('change', () => {
-      filterQuickExp.value = '';
+    if (reloadBtn) reloadBtn.addEventListener('click', () => loadRequests(1));
+    if (filterStatus) filterStatus.addEventListener('change', () => loadRequests(1));
+    if (filterExpBefore) filterExpBefore.addEventListener('change', () => {
+      if (filterQuickExp) filterQuickExp.value = '';
       loadRequests(1);
     });
-    filterQuickExp.addEventListener('change', () => {
-      if (filterQuickExp.value) filterExpBefore.value = '';
+    if (filterQuickExp) filterQuickExp.addEventListener('change', () => {
+      if (filterQuickExp.value && filterExpBefore) filterExpBefore.value = '';
       loadRequests(1);
     });
 
-    viewerInput.addEventListener('change', () => {
+    if (viewerInput) viewerInput.addEventListener('change', () => {
       requesterFilter = viewerInput.value.trim();
       loadRequests();
     });
     async function loadRequests(page = 1) {
       if (!authToken) {
-        tableBody.innerHTML = '<tr><td colspan="8" style="padding:12px;color:var(--muted);">Faça login para ver suas solicitações.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="8" style="padding:12px;color:var(--muted);">Faça login para ver suas mudanças.</td></tr>';
         return;
       }
       listStatus.style.display = 'none';
@@ -602,12 +854,17 @@
         qs.set('page', page);
         qs.set('page_size', 10);
         if (requesterFilter) qs.set('requester', requesterFilter);
-        if (filterStatus.value) qs.set('status', filterStatus.value);
-        if (filterId.value) qs.set('id', filterId.value.trim());
-        if (filterAccount.value) qs.set('aws_account', filterAccount.value.trim());
-        if (filterExpBefore.value) qs.set('expires_before', filterExpBefore.value);
-        if (filterQuickExp.value) {
-          const days = parseInt(filterQuickExp.value, 10);
+        const fStatus = filterStatus?.value || '';
+        const fId = filterId?.value || '';
+        const fAccount = filterAccount?.value || '';
+        const fExpBefore = filterExpBefore?.value || '';
+        const fQuick = filterQuickExp?.value || '';
+        if (fStatus) qs.set('status', fStatus);
+        if (fId) qs.set('id', fId.trim());
+        if (fAccount) qs.set('aws_account', fAccount.trim());
+        if (fExpBefore) qs.set('expires_before', fExpBefore);
+        if (fQuick) {
+          const days = parseInt(fQuick, 10);
           const d = new Date();
           d.setDate(d.getDate() + days);
           qs.set('expires_before', d.toISOString().slice(0,10));
@@ -615,12 +872,12 @@
         const url = `/api/requests?${qs.toString()}`;
         const data = await withAuth(async (token) => {
           const res = await fetch(url, { headers: token ? { 'X-Auth-Token': token } : {} });
-          if (!res.ok) throw new Error('Erro ao listar solicitações');
+          if (!res.ok) throw new Error('Erro ao listar mudanças');
           return res.json();
         });
         const items = data.items || [];
         if (!items.length) {
-          tableBody.innerHTML = '<tr><td colspan="8" style="padding:12px;color:var(--muted);">Nenhuma solicitação ainda.</td></tr>';
+          tableBody.innerHTML = '<tr><td colspan="8" style="padding:12px;color:var(--muted);">Nenhuma mudança ainda.</td></tr>';
           return;
         }
         tableBody.innerHTML = '';
@@ -709,7 +966,10 @@
     function attachActionHandlers() {
       document.querySelectorAll('.action.approve').forEach(btn => {
         btn.onclick = () => {
-          if (confirm('Confirmar aprovação?')) updateStatus(btn.dataset.id, 'aprovado');
+          if (confirm('Confirmar aprovação?')) {
+            const notes = document.getElementById('modal-notes-input')?.value || '';
+            updateStatus(btn.dataset.id, 'aprovado', notes);
+          }
         };
       });
       document.querySelectorAll('.action.details').forEach(btn => {
@@ -722,72 +982,183 @@
       });
       document.querySelectorAll('.action.delete').forEach(btn => {
         btn.onclick = () => {
-          if (confirm('Remover definitivamente esta solicitação?')) {
+          if (confirm('Remover definitivamente esta mudança?')) {
             deleteRequest(btn.dataset.id);
           }
         };
       });
       document.querySelectorAll('.action.cancel').forEach(btn => {
         btn.onclick = () => {
-          if (confirm('Cancelar e remover sua solicitação?')) {
+          if (confirm('Cancelar e remover sua mudança?')) {
             deleteRequest(btn.dataset.id);
           }
         };
       });
     }
 
-    async function updateStatus(id, status) {
+    async function updateStatus(id, status, notes = null) {
       try {
         await withAuth(async (token) => {
           const res = await fetch(`/api/requests/${id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json', 'X-Auth-Token': token || '' },
-            body: JSON.stringify({ status })
+            body: JSON.stringify({ status, approval_notes: notes })
           });
           if (!res.ok) throw new Error('Falha ao atualizar status');
         });
         await loadRequests();
+        await loadSummary();
         toast('Status atualizado', 'success');
       } catch (err) {
         toast(err.message, 'error');
       }
     }
 
+    async function updateCost(id, cost) {
+      try {
+        await withAuth(async (token) => {
+          const res = await fetch(`/api/requests/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', 'X-Auth-Token': token || '' },
+            body: JSON.stringify({ estimated_cost: cost || null })
+          });
+          if (!res.ok) throw new Error('Falha ao salvar custo');
+        });
+        await loadRequests();
+        await loadSummary();
+        toast('Custo atualizado', 'success');
+      } catch (err) {
+        toast(err.message, 'error');
+      }
+    }
+
     function openDetail(btn) {
+          detailChangeType.textContent = btn.dataset.change_type || '-';
+      detailCriticality.textContent = btn.dataset.criticality || '-';
+      detailJustification.textContent = btn.dataset.justification || '-';
+      detailNotes.textContent = btn.dataset.notes || '-';
       detailParams.textContent = btn.dataset.params || '-';
       detailTags.textContent = btn.dataset.tags || '-';
       detailCost.textContent = btn.dataset.cost || '-';
       detailResource.textContent = btn.dataset.resource || '-';
       const status = btn.dataset.status || '-';
+      const flowType = btn.dataset.flow || 'finops';
       const idfull = btn.dataset.idfull || '-';
       const chip = document.getElementById('detail-status-chip');
       chip.className = `chip ${status}`;
       chip.textContent = status;
-      document.getElementById('detail-title').textContent = `Solicitação ${idfull.slice(0,8)}`;
+      document.getElementById('detail-title').textContent = `Mudança ${idfull.slice(0,8)}`;
+      const otherRaw = btn.dataset.other || '{}';
+      try {
+        const otherObj = JSON.parse(otherRaw);
+        const otherEntries = Object.entries(otherObj);
+        if (otherEntries.length) {
+          const mapLabels = {
+            oq_desc: 'O que será mudado',
+            oq_urgencia: 'Urgência/criticidade',
+            oq_riscos: 'Riscos/serviços afetados',
+            oq_chamado: 'Chamado relacionado',
+            quem_exec: 'Quem executa/aprova',
+            quem_afetados: 'Quem é afetado/comunicado',
+            quando_exec: 'Quando executa',
+            quanto_roi: 'Custo/ROI',
+            onde_ativos: 'Onde/como executar',
+            como_passos: 'Passos/rollback'
+          };
+          detailOther.innerHTML = otherEntries.map(([k,v]) => {
+            const label = mapLabels[k] || k;
+            return `<div><strong>${label}:</strong> ${v}</div>`;
+          }).join('');
+        } else {
+          detailOther.textContent = '-';
+        }
+      } catch {
+        detailOther.textContent = '-';
+      }
+      // mostrar/ocultar blocos conforme o fluxo
+      if (flowType === 'outros') {
+        if (detailChangeTypeBlock) detailChangeTypeBlock.style.display = 'none';
+        if (detailCriticalityBlock) detailCriticalityBlock.style.display = 'none';
+        if (detailJustificationBlock) detailJustificationBlock.style.display = detailJustification.textContent && detailJustification.textContent !== '-' ? 'block' : 'none';
+        if (detailOtherBlock) detailOtherBlock.style.display = 'block';
+      } else {
+        if (detailChangeTypeBlock) detailChangeTypeBlock.style.display = 'block';
+        if (detailCriticalityBlock) detailCriticalityBlock.style.display = 'block';
+        if (detailJustificationBlock) detailJustificationBlock.style.display = 'block';
+        if (detailOtherBlock) detailOtherBlock.style.display = 'none';
+      }
+      if (detailParamsBlock) detailParamsBlock.style.display = detailParams.textContent && detailParams.textContent !== '-' ? 'block' : 'none';
+      if (detailTagsBlock) detailTagsBlock.style.display = detailTags.textContent && detailTags.textContent !== '-' ? 'block' : 'none';
+      if (detailCostBlock) detailCostBlock.style.display = detailCost.textContent && detailCost.textContent !== '-' ? 'block' : 'none';
+      if (detailResourceBlock) detailResourceBlock.style.display = detailResource.textContent && detailResource.textContent !== '-' ? 'block' : 'none';
 
       const modalActions = document.getElementById('modal-actions');
       modalActions.innerHTML = '';
       const id = btn.dataset.id;
       const isAdmin = currentUser && currentUser.role === 'admin';
+      const notesInput = document.createElement('textarea');
+      notesInput.id = 'modal-notes-input';
+      notesInput.placeholder = 'Notas/decisão (admin)';
+      notesInput.style.width = '100%';
+      notesInput.style.minHeight = '60px';
+      notesInput.style.padding = '8px 10px';
+      notesInput.style.borderRadius = '10px';
+      notesInput.style.border = '1px solid rgba(255,255,255,0.12)';
+      notesInput.style.background = 'rgba(255,255,255,0.05)';
+      notesInput.style.color = 'var(--text)';
+      notesInput.value = btn.dataset.notes || '';
       if (isAdmin) {
+        const costWrap = document.createElement('div');
+        costWrap.style.display = 'flex';
+        costWrap.style.gap = '8px';
+        costWrap.style.flexWrap = 'wrap';
+        costWrap.style.width = '100%';
+        const costInput = document.createElement('input');
+        costInput.type = 'text';
+        costInput.placeholder = 'Custo previsto (R$)';
+        costInput.value = btn.dataset.cost || '';
+        costInput.style.flex = '1 1 160px';
+        costInput.style.padding = '8px 10px';
+        costInput.style.borderRadius = '10px';
+        costInput.style.border = '1px solid rgba(255,255,255,0.12)';
+        costInput.style.background = 'rgba(255,255,255,0.05)';
+        costInput.style.color = 'var(--text)';
+        const saveCost = document.createElement('button');
+        saveCost.className = 'btn-secondary';
+        saveCost.textContent = 'Salvar custo';
+        saveCost.onclick = () => updateCost(id, costInput.value);
+        costWrap.appendChild(costInput);
+        costWrap.appendChild(saveCost);
+        modalActions.appendChild(costWrap);
+        modalActions.appendChild(notesInput);
+
         const approve = document.createElement('button');
         approve.className = 'btn-primary';
         approve.textContent = 'Aprovar';
-        approve.onclick = () => updateStatus(id, 'aprovado');
+        approve.onclick = () => updateStatus(id, 'aprovado', notesInput.value);
+        const reject = document.createElement('button');
+        reject.className = 'btn-secondary';
+        reject.textContent = 'Reprovar';
+        reject.onclick = () => {
+          if (confirm('Reprovar esta mudança?')) {
+            updateStatus(id, 'reprovado', notesInput.value);
+          }
+        };
         const remove = document.createElement('button');
         remove.className = 'btn-danger';
         remove.textContent = 'Remover';
         remove.onclick = () => {
-          if (confirm('Remover definitivamente esta solicitação?')) deleteRequest(id);
+          if (confirm('Remover definitivamente esta mudança?')) deleteRequest(id);
         };
         modalActions.appendChild(approve);
+        modalActions.appendChild(reject);
         modalActions.appendChild(remove);
       } else {
         const cancel = document.createElement('button');
         cancel.className = 'btn-danger';
         cancel.textContent = 'Cancelar';
         cancel.onclick = () => {
-          if (confirm('Cancelar e remover sua solicitação?')) deleteRequest(id);
+          if (confirm('Cancelar e remover sua mudança?')) deleteRequest(id);
         };
         modalActions.appendChild(cancel);
       }
@@ -804,7 +1175,8 @@
           }
         });
         await loadRequests();
-        toast('Solicitação removida da lista', 'success');
+        await loadSummary();
+        toast('Mudança removida da lista', 'success');
       } catch (err) {
         toast(err.message, 'error');
       }
@@ -842,6 +1214,9 @@
     importBtn.addEventListener('click', () => {
       importInput.click();
     });
+    if (createUserBtn) createUserBtn.onclick = () => { userModalOverlay.style.display = 'flex'; userStatus.style.display = 'none'; };
+    if (userModalClose) userModalClose.onclick = () => { userModalOverlay.style.display = 'none'; };
+    userModalOverlay.addEventListener('click', (e) => { if (e.target === userModalOverlay) userModalOverlay.style.display = 'none'; });
 
     importInput.addEventListener('change', async () => {
       const file = importInput.files[0];
@@ -868,7 +1243,7 @@
             throw new Error(t || 'Erro ao importar CSV');
           }
           const data = await res.json();
-          userStatus.textContent = `Importado: ${data.count} solicitações.`;
+          userStatus.textContent = `Importado: ${data.count} mudanças.`;
           userStatus.className = 'status success';
           userStatus.style.display = 'block';
           loadRequests(1);
@@ -895,16 +1270,18 @@
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('user');
-      tableBody.innerHTML = '<tr><td colspan="8" style="padding:12px;color:var(--muted);">Faça login para ver suas solicitações.</td></tr>';
+      tableBody.innerHTML = '<tr><td colspan="8" style="padding:12px;color:var(--muted);">Faça login para ver suas mudanças.</td></tr>';
       statusEl.style.display = 'none';
       listStatus.style.display = 'none';
     }
 
-    loginBtn.addEventListener('click', () => {
-      clearSession();
-      updateAuthUI();
-      summaryContainer.style.display = 'none';
-    });
+    if (loginBtn) {
+      loginBtn.addEventListener('click', () => {
+        clearSession();
+        updateAuthUI();
+        summaryContainer.style.display = 'none';
+      });
+    }
 
     logoutBtn.addEventListener('click', () => {
       clearSession();
@@ -952,37 +1329,45 @@
     });
 
     function updateAuthUI() {
+      if (!formCard || !loginPanel || !protectedSection) return;
       if (currentUser) {
-        userInfo.textContent = `${currentUser.display_name} (${currentUser.role})`;
-        loginBtn.style.display = 'inline-block';
-        loginBtn.textContent = 'Trocar usuário';
-        logoutBtn.style.display = 'inline-block';
+        if (userInfo) userInfo.textContent = `${currentUser.display_name} (${currentUser.role})`;
+        if (loginBtn) { loginBtn.style.display = 'inline-block'; loginBtn.textContent = 'Trocar usuário'; }
+        if (logoutBtn) logoutBtn.style.display = 'inline-block';
+        if (createUserBtn) createUserBtn.style.display = currentUser.role === 'admin' ? 'inline-block' : 'none';
+        if (loginInfo) loginInfo.style.display = 'none';
         protectedSection.style.display = 'block';
         loginPanel.style.display = 'none';
         if (currentUser.role === 'admin') {
           formCard.style.display = 'none';
-          userPanel.style.display = 'block';
-          document.querySelector('#requests-title').textContent = 'Todas as solicitações';
-          filtersCard.style.display = 'block';
+          const titleEl = document.querySelector('#requests-title');
+          if (titleEl) titleEl.textContent = 'Todas as mudanças';
+          if (filtersCard) filtersCard.style.display = 'block';
+          if (estimatedCostField) estimatedCostField.style.display = 'block';
         } else {
           formCard.style.display = 'block';
-          formCard.querySelector('form').style.display = 'grid';
-          userPanel.style.display = 'none';
-          document.querySelector('#requests-title').textContent = 'Minhas solicitações';
-          filtersCard.style.display = 'none';
+          const formEl = formCard.querySelector('form');
+          if (formEl) formEl.style.display = 'grid';
+          const titleEl = document.querySelector('#requests-title');
+          if (titleEl) titleEl.textContent = 'Minhas mudanças';
+          if (filtersCard) filtersCard.style.display = 'none';
+          if (estimatedCostField) estimatedCostField.style.display = 'none';
         }
       } else {
-        userInfo.textContent = '';
-        loginBtn.textContent = 'Entrar';
-        loginBtn.style.display = 'inline-block';
-        logoutBtn.style.display = 'none';
+        if (userInfo) userInfo.textContent = '';
+        if (loginBtn) { loginBtn.textContent = 'Entrar'; loginBtn.style.display = 'inline-block'; }
+        if (logoutBtn) logoutBtn.style.display = 'none';
+        if (createUserBtn) createUserBtn.style.display = 'none';
         protectedSection.style.display = 'none';
         loginPanel.style.display = 'block';
         formCard.style.display = 'block';
-        formCard.querySelector('form').style.display = 'grid';
-        userPanel.style.display = 'none';
-        filtersCard.style.display = 'none';
-        document.querySelector('#requests-title').textContent = 'Minhas solicitações';
+        const formEl = formCard.querySelector('form');
+        if (formEl) formEl.style.display = 'grid';
+        if (filtersCard) filtersCard.style.display = 'none';
+        if (loginInfo) loginInfo.style.display = 'block';
+        const titleEl = document.querySelector('#requests-title');
+        if (titleEl) titleEl.textContent = 'Minhas mudanças';
+        if (estimatedCostField) estimatedCostField.style.display = 'none';
       }
     }
 

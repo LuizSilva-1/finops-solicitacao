@@ -80,6 +80,10 @@ def test_admin_cannot_create_request(seeded_db):
         "aws_account": "123",
         "region": "sa-east-1",
         "expires_at": "2030-01-01",
+        "change_type": "provisionamento",
+        "criticality": "baixa",
+        "justification": "teste",
+        "flow_type": "finops",
     }
     res = client.post("/api/requests", json=payload, headers={"X-Auth-Token": token})
     assert res.status_code == 403
@@ -95,6 +99,10 @@ def test_create_and_list_request(seeded_db):
         "expires_at": future_date,
         "params": "test",
         "tags": "Owner=user",
+        "change_type": "provisionamento",
+        "criticality": "baixa",
+        "justification": "teste",
+        "flow_type": "finops",
     }
     res = client.post("/api/requests", json=payload, headers={"X-Auth-Token": token})
     assert res.status_code == 200
@@ -115,6 +123,10 @@ def test_validation_expires_in_future(seeded_db):
         "aws_account": "123",
         "region": "sa-east-1",
         "expires_at": "2000-01-01",
+        "change_type": "provisionamento",
+        "criticality": "baixa",
+        "justification": "teste",
+        "flow_type": "finops",
     }
     res = client.post("/api/requests", json=payload, headers={"X-Auth-Token": token})
     assert res.status_code == 400

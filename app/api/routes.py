@@ -124,23 +124,37 @@ def create_request(
     if user.role == "admin":
         raise HTTPException(status_code=403, detail="Admins não podem criar solicitações")
     settings = get_settings()
-    if request_in.service_type not in settings.allowed_services:
-        raise HTTPException(status_code=400, detail=f"Serviço não permitido. Permitidos: {', '.join(settings.allowed_services)}")
-    if request_in.region not in settings.allowed_regions:
-        raise HTTPException(status_code=400, detail=f"Região não permitida. Permitidas: {', '.join(settings.allowed_regions)}")
-    if not request_in.aws_account:
-        raise HTTPException(status_code=400, detail="Conta AWS é obrigatória")
-    if settings.allowed_accounts:
-        if request_in.aws_account not in settings.allowed_accounts:
-            raise HTTPException(status_code=400, detail=f"Conta não permitida. Permitidas: {', '.join(settings.allowed_accounts)}")
     today = date.today()
-    if request_in.expires_at <= today:
-        raise HTTPException(status_code=400, detail="Data de remoção deve ser futura")
-    max_date = today + timedelta(days=settings.max_expiration_days)
-    if request_in.expires_at > max_date:
-        raise HTTPException(status_code=400, detail=f"Data de remoção não pode exceder {settings.max_expiration_days} dias")
+    if request_in.expires_at:
+        if request_in.expires_at <= today:
+            raise HTTPException(status_code=400, detail="Data de remoção deve ser futura")
+        max_date = today + timedelta(days=settings.max_expiration_days)
+        if request_in.expires_at > max_date:
+            raise HTTPException(status_code=400, detail=f"Data de remoção não pode exceder {settings.max_expiration_days} dias")
     if request_in.retention_days is not None and request_in.retention_days < 1:
         raise HTTPException(status_code=400, detail="Tempo de uso (dias) deve ser positivo")
+    if request_in.flow_type not in ("finops", "outros"):
+        raise HTTPException(status_code=400, detail="flow_type deve ser 'finops' ou 'outros'")
+    if request_in.flow_type == "finops":
+        if request_in.service_type not in settings.allowed_services:
+            raise HTTPException(status_code=400, detail=f"Serviço não permitido. Permitidos: {', '.join(settings.allowed_services)}")
+        if request_in.region not in settings.allowed_regions:
+            raise HTTPException(status_code=400, detail=f"Região não permitida. Permitidas: {', '.join(settings.allowed_regions)}")
+        if not request_in.aws_account:
+            raise HTTPException(status_code=400, detail="Conta AWS é obrigatória")
+        if settings.allowed_accounts:
+            if request_in.aws_account not in settings.allowed_accounts:
+                raise HTTPException(status_code=400, detail=f"Conta não permitida. Permitidas: {', '.join(settings.allowed_accounts)}")
+        if not request_in.change_type:
+            raise HTTPException(status_code=400, detail="Tipo de mudança é obrigatório")
+        if not request_in.justification:
+            raise HTTPException(status_code=400, detail="Justificativa é obrigatória")
+        if not request_in.criticality:
+            raise HTTPException(status_code=400, detail="Criticidade é obrigatória")
+    else:
+        # fluxo "outros": não força catálogos de serviço/região/conta; define serviço como "outro" se vier vazio
+        if not request_in.service_type:
+            request_in.service_type = "outro"
     data = request_in.dict()
     data["requester"] = user.display_name or user.username
     obj = models.request.Request(**data)
@@ -148,9 +162,7 @@ def create_request(
     db.commit()
     db.refresh(obj)
     _add_audit(db, obj.id, "created", user.username)
-    notifications.send_webhook(
-        f"[Nova] {obj.service_type} para {obj.aws_account or '-'} por {user.username} | expira: {obj.expires_at}"
-    )
+    notifications.send_webhook(_fmt_webhook("Nova", obj, actor=user.username))
     return obj
 
 
@@ -212,7 +224,7 @@ def update_request(
     db.commit()
     db.refresh(obj)
     _add_audit(db, obj.id, "updated", admin.username)
-    notifications.send_webhook(f"[Status] {obj.id} agora {obj.status} (por {admin.username})")
+    notifications.send_webhook(_fmt_webhook(f"Status: {obj.status}", obj, actor=admin.username))
     return obj
 
 
@@ -226,7 +238,7 @@ def expire_request(request_id: str, db: Session = Depends(get_db), admin=Depends
     db.commit()
     db.refresh(obj)
     _add_audit(db, obj.id, "expired", admin.username)
-    notifications.send_webhook(f"[Expirado] {obj.id} marcado por {admin.username}")
+    notifications.send_webhook(_fmt_webhook("Expirado", obj, actor=admin.username))
     return obj
 
 
@@ -246,7 +258,7 @@ def mark_removed(
     db.commit()
     db.refresh(obj)
     _add_audit(db, obj.id, "removed", admin.username)
-    notifications.send_webhook(f"[Removido] {obj.id} marcado por {admin.username}")
+    notifications.send_webhook(_fmt_webhook("Removido", obj, actor=admin.username))
     return obj
 
 
@@ -267,6 +279,17 @@ def delete_request(
     db.commit()
     notifications.send_webhook(f"[Removido definitivamente] {request_id} por {user.username}")
     return {"detail": "deleted"}
+
+
+def _fmt_webhook(event: str, req: models.request.Request, actor: str) -> str:
+    cost = f" • Custo prev: {req.estimated_cost}" if req.estimated_cost else ""
+    return (
+        f"[GMUD] {event} | {req.service_type} • conta {req.aws_account or '-'} • região {req.region or '-'}\n"
+        f"Tipo: {req.change_type or '-'} • Criticidade: {req.criticality or '-'}\n"
+        f"Solicitante: {req.requester} • Ação por: {actor}\n"
+        f"Justificativa: {req.justification or '-'}{cost}\n"
+        f"Expira em: {req.expires_at}"
+    )
 
 
 def _add_audit(db: Session, request_id: str, action: str, by: str):

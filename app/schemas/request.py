@@ -11,12 +11,18 @@ class RequestBase(BaseModel):
     tags: Optional[str] = None
     region: Optional[str] = None
     aws_account: Optional[str] = None
-    expires_at: date
+    expires_at: Optional[date] = None
     retention_days: Optional[int] = None
     resource_id: Optional[str] = None
     estimated_cost: Optional[str] = None
     auto_delete: bool = False
     approver: Optional[str] = None
+    change_type: Optional[str] = None
+    justification: Optional[str] = None
+    criticality: Optional[str] = None
+    approval_notes: Optional[str] = None
+    flow_type: str
+    other_payload: Optional[dict] = None
 
 
 class RequestCreate(RequestBase):
@@ -28,6 +34,13 @@ class RequestUpdate(BaseModel):
     expires_at: Optional[date] = None
     retention_days: Optional[int] = None
     approver: Optional[str] = None
+    change_type: Optional[str] = None
+    justification: Optional[str] = None
+    criticality: Optional[str] = None
+    estimated_cost: Optional[str] = None
+    approval_notes: Optional[str] = None
+    flow_type: Optional[str] = None
+    other_payload: Optional[dict] = None
 
 
 class RequestInDBBase(RequestBase):
