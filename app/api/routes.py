@@ -22,6 +22,49 @@ def api_root():
     return {"message": "API v1: use /requests e endpoints relacionados"}
 
 
+@router.get("/meta")
+def meta(user=Depends(get_current_user)):
+    settings = get_settings()
+    return {
+        "allowed_services": settings.allowed_services,
+        "allowed_regions": settings.allowed_regions,
+        "allowed_accounts": settings.allowed_accounts,
+        "max_expiration_days": settings.max_expiration_days,
+    }
+
+@router.get("/requests/summary")
+def requests_summary(db: Session = Depends(get_db), admin=Depends(require_admin)):
+    today = date.today()
+    in_7 = today + timedelta(days=7)
+    in_30 = today + timedelta(days=30)
+    expiring_7 = (
+        db.query(models.request.Request)
+        .filter(models.request.Request.status.in_(["pendente", "aprovado"]))
+        .filter(models.request.Request.expires_at >= today)
+        .filter(models.request.Request.expires_at <= in_7)
+        .count()
+    )
+    expiring_30 = (
+        db.query(models.request.Request)
+        .filter(models.request.Request.status.in_(["pendente", "aprovado"]))
+        .filter(models.request.Request.expires_at >= today)
+        .filter(models.request.Request.expires_at <= in_30)
+        .count()
+    )
+    expired_unremoved = (
+        db.query(models.request.Request)
+        .filter(models.request.Request.status == "expirado")
+        .count()
+    )
+    pending = db.query(models.request.Request).filter(models.request.Request.status == "pendente").count()
+    return {
+        "expiring_7": expiring_7,
+        "expiring_30": expiring_30,
+        "expired_unremoved": expired_unremoved,
+        "pending": pending,
+    }
+
+
 class LoginPayload(BaseModel):
     username: str
     password: str
@@ -87,6 +130,9 @@ def create_request(
         raise HTTPException(status_code=400, detail=f"Região não permitida. Permitidas: {', '.join(settings.allowed_regions)}")
     if not request_in.aws_account:
         raise HTTPException(status_code=400, detail="Conta AWS é obrigatória")
+    if settings.allowed_accounts:
+        if request_in.aws_account not in settings.allowed_accounts:
+            raise HTTPException(status_code=400, detail=f"Conta não permitida. Permitidas: {', '.join(settings.allowed_accounts)}")
     today = date.today()
     if request_in.expires_at <= today:
         raise HTTPException(status_code=400, detail="Data de remoção deve ser futura")
@@ -112,6 +158,8 @@ def create_request(
 def list_requests(
     status: Optional[str] = None,
     requester: Optional[str] = None,
+    id: Optional[str] = None,
+    aws_account: Optional[str] = None,
     expires_before: Optional[date] = None,
     expires_after: Optional[date] = None,
     page: int = 1,
@@ -125,6 +173,10 @@ def list_requests(
     if user.role != "admin":
         q = q.filter(models.request.Request.requester == (user.display_name or user.username))
     else:
+        if id:
+            q = q.filter(models.request.Request.id.ilike(f"%{id}%"))
+        if aws_account:
+            q = q.filter(models.request.Request.aws_account.ilike(f"%{aws_account}%"))
         if status:
             q = q.filter(models.request.Request.status == status)
         if requester:
@@ -196,6 +248,25 @@ def mark_removed(
     _add_audit(db, obj.id, "removed", admin.username)
     notifications.send_webhook(f"[Removido] {obj.id} marcado por {admin.username}")
     return obj
+
+
+@router.delete("/requests/{request_id}", status_code=204)
+def delete_request(
+    request_id: str,
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user),
+):
+    obj = db.query(models.request.Request).filter(models.request.Request.id == request_id).first()
+    if not obj:
+        raise HTTPException(status_code=404, detail="Request not found")
+    is_owner = obj.requester == (user.display_name or user.username)
+    if not (user.role == "admin" or is_owner):
+        raise HTTPException(status_code=403, detail="Sem permissão para remover esta solicitação")
+    db.query(models.audit.Audit).filter(models.audit.Audit.request_id == obj.id).delete()
+    db.delete(obj)
+    db.commit()
+    notifications.send_webhook(f"[Removido definitivamente] {request_id} por {user.username}")
+    return {"detail": "deleted"}
 
 
 def _add_audit(db: Session, request_id: str, action: str, by: str):

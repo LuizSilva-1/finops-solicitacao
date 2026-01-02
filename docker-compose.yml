@@ -19,6 +19,9 @@ services:
       DATABASE_URL: postgresql+psycopg2://finops:finops@db:5432/finops
       USERS_FILE: /app/data/users.json
       PYTHONPATH: /app
+      WEBHOOK_URL: ${WEBHOOK_URL:-}
+      WEBHOOK_CHANNEL: ${WEBHOOK_CHANNEL:-}
+      WEBHOOK_USERNAME: ${WEBHOOK_USERNAME:-}
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\""]
       interval: 30s
@@ -37,6 +40,10 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg2://finops:finops@db:5432/finops
       USERS_FILE: /app/data/users.json
+      PYTHONPATH: /app
+      WEBHOOK_URL: ${WEBHOOK_URL:-}
+      WEBHOOK_CHANNEL: ${WEBHOOK_CHANNEL:-}
+      WEBHOOK_USERNAME: ${WEBHOOK_USERNAME:-}
     command: ["sh", "-c", "python -m app.scripts.prestart && alembic upgrade head && python -m app.worker"]
     volumes:
       - ./data:/app/data

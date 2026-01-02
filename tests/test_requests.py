@@ -89,7 +89,6 @@ def test_create_and_list_request(seeded_db):
     token = login("user", "user123")
     future_date = (date.today() + timedelta(days=30)).strftime("%Y-%m-%d")
     payload = {
-        "requester": "user",
         "service_type": "ebs_snapshot",
         "aws_account": "123",
         "region": "sa-east-1",
@@ -112,7 +111,6 @@ def test_create_and_list_request(seeded_db):
 def test_validation_expires_in_future(seeded_db):
     token = login("user", "user123")
     payload = {
-        "requester": "user",
         "service_type": "ebs_snapshot",
         "aws_account": "123",
         "region": "sa-east-1",

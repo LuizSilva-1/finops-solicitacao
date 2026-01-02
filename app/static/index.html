@@ -30,6 +30,9 @@
     .container {
       width: min(1200px, 100%);
     }
+    .layout-row { display:flex; gap:16px; flex-wrap:wrap; align-items:flex-start; }
+    .filters-col { flex:0 0 280px; }
+    .list-col { flex:1 1 0; min-width:320px; }
     header {
       display: flex;
       justify-content: space-between;
@@ -56,9 +59,12 @@
     }
     label {
       display: block;
-      font-weight: 600;
-      margin-bottom: 6px;
-      color: #d0d7de;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      color: #cdd6e0;
     }
     input, select, textarea {
       width: 100%;
@@ -69,9 +75,16 @@
       color: var(--text);
       font-size: 14px;
     }
+    select option { background: #0f1621; color: #e6edf3; }
+    select option:disabled { color: var(--muted); }
+    select option { background: #0f1621; color: #e6edf3; }
+    select option:disabled { color: var(--muted); }
     textarea { resize: vertical; min-height: 80px; }
     .full { grid-column: 1 / -1; }
     td { vertical-align: middle; }
+    thead th { position: sticky; top: 0; background: #111821; z-index: 1; }
+    tbody tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+    tr:hover { background: rgba(255,255,255,0.04); }
     .actions {
       grid-column: 1 / -1;
       display: flex;
@@ -107,26 +120,43 @@
     }
     .status.success { background: rgba(74,222,128,0.12); color: #bbf7d0; border: 1px solid rgba(74,222,128,0.3); }
     .status.error { background: rgba(244,63,94,0.12); color: #fecdd3; border: 1px solid rgba(244,63,94,0.3); }
+    .toast-container { position: fixed; top: 16px; right: 16px; display: flex; flex-direction: column; gap: 10px; z-index: 1100; }
+    .toast { padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.08); color: #e5e7eb; box-shadow: 0 12px 30px rgba(0,0,0,0.35); min-width: 240px; }
+    .toast.success { border-color: rgba(34,197,94,0.35); background: rgba(34,197,94,0.15); color: #c8facc; }
+    .toast.error { border-color: rgba(244,63,94,0.35); background: rgba(244,63,94,0.15); color: #fecdd3; }
     .chip {
-      display: inline-block;
-      padding: 4px 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 9px;
       border-radius: 999px;
       font-weight: 700;
-      font-size: 12px;
+      font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 0.02em;
+      border: 1px solid rgba(255,255,255,0.08);
     }
-    .chip.pendente { background: rgba(250,204,21,0.15); color: #facc15; }
-    .chip.aprovado { background: rgba(74,222,128,0.15); color: #4ade80; }
-    .chip.expirado { background: rgba(248,113,113,0.15); color: #f87171; }
-    .chip.removido { background: rgba(148,163,184,0.15); color: #94a3b8; }
-    .actions-row { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
-    .actions-row button { padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.05); color: var(--text); }
-    .btn-approve { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.12); color: #e5e7eb; }
-    .btn-expire { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.12); color: #e5e7eb; }
-    .btn-danger { background: rgba(244,63,94,0.12); border-color: rgba(244,63,94,0.3); color: #fecdd3; }
+    .chip::before { font-size: 12px; }
+    .chip.pendente { background: rgba(250,204,21,0.12); color: #e9d12c; border-color: rgba(250,204,21,0.25); }
+    .chip.pendente::before { content: "⏰"; }
+    .chip.aprovado { background: rgba(74,222,128,0.12); color: #80f0a2; border-color: rgba(74,222,128,0.25); }
+    .chip.aprovado::before { content: "✔︎"; }
+    .chip.expirado { background: rgba(248,113,113,0.12); color: #f88b8b; border-color: rgba(248,113,113,0.25); }
+    .chip.expirado::before { content: "⛔"; }
+    .chip.removido { background: rgba(148,163,184,0.12); color: #c2cbd6; border-color: rgba(148,163,184,0.25); }
+    .chip.removido::before { content: "✖︎"; }
+    .actions-row { display:grid; grid-template-columns: repeat(2, minmax(64px, 1fr)); gap:6px; align-items:start; }
+    .actions-row button { padding: 6px 8px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); color: var(--text); font-size:11px; }
+    .sla-btn { padding:6px 10px; border-radius:12px; border:1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.05); color: var(--text); font-size:12px; cursor:pointer; min-width:70px; text-align:center; }
+    .sla-btn.soon { border-color: rgba(250,204,21,0.35); color: #facc15; }
+    .sla-btn.late { border-color: rgba(248,113,113,0.35); color: #f87171; }
+    .sla-btn.far { border-color: rgba(148,163,184,0.25); color: #cbd5e1; }
+    .id-link { color: #8ab4ff; background:none; border:none; padding:0; cursor:pointer; font-weight:700; }
+    .id-link:hover { text-decoration: underline; }
+    .btn-approve { background: rgba(34,197,94,0.12); border-color: rgba(34,197,94,0.25); color: #c8facc; }
+    .btn-danger { background: rgba(244,63,94,0.12); border-color: rgba(244,63,94,0.25); color: #fecdd3; }
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); display: none; align-items: center; justify-content: center; padding: 16px; z-index: 1000; }
-    .modal { background: var(--card); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; max-width: 560px; width: 100%; box-shadow: 0 24px 60px rgba(0,0,0,0.55); }
+    .modal { background: #0f141c; border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; max-width: 560px; width: 100%; box-shadow: 0 24px 60px rgba(0,0,0,0.65); }
     .modal-header { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; }
     .modal-title { font-weight: 700; letter-spacing: -0.01em; }
     .modal-body { padding: 16px 20px 20px 20px; color: #e5e7eb; display: grid; gap: 10px; }
@@ -134,6 +164,16 @@
     .detail-item { padding: 10px 12px; border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; background: rgba(255,255,255,0.03); }
     .detail-label { font-weight: 700; color: #cbd5e1; font-size: 13px; display:block; margin-bottom:4px; text-transform: uppercase; letter-spacing: 0.02em; }
     .detail-value { color: #e2e8f0; white-space: pre-wrap; }
+    .summary-grid { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
+    .summary-card { background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:12px 14px; min-width:140px; box-shadow: 0 12px 30px rgba(0,0,0,0.25); }
+    .summary-card:nth-child(1) { border-color: rgba(250,204,21,0.35); }
+    .summary-card:nth-child(2) { border-color: rgba(56,189,248,0.35); }
+    .summary-card:nth-child(3) { border-color: rgba(248,113,113,0.35); }
+    .summary-card:nth-child(4) { border-color: rgba(74,222,128,0.35); }
+    .summary-title { color:#cbd5e1; font-size:12px; letter-spacing:0.02em; text-transform: uppercase; margin-bottom:4px; }
+    .summary-value { font-size:20px; font-weight:700; color:#e5e7eb; }
+    .filter-stack { display:flex; flex-direction:column; gap:10px; }
+    .pager { display:flex; gap:8px; align-items:center; justify-content:flex-end; margin-top:12px; flex-wrap:wrap; }
     @media (max-width: 600px) {
       body { padding: 16px 12px; }
       .actions { justify-content: stretch; }
@@ -166,109 +206,116 @@
     </div>
 
     <div id="protected-section" style="display:none;">
-    <div class="card" id="form-card">
-      <form id="request-form">
-        <div>
-          <label for="requester">Solicitante *</label>
-          <input id="requester" name="requester" required placeholder="nome@empresa.com">
-        </div>
-        <div>
-          <label for="service_type">Serviço *</label>
-          <select id="service_type" name="service_type" required>
-            <option value="" disabled selected>Selecione</option>
-            <option value="ebs_snapshot">EBS Snapshot</option>
-            <option value="ec2">EC2</option>
-            <option value="elb">ELB</option>
-            <option value="s3">S3</option>
-            <option value="rds_snapshot">RDS Snapshot</option>
-            <option value="outro">Outro</option>
-          </select>
-        </div>
-        <div>
-          <label for="aws_account">Conta AWS *</label>
-          <input id="aws_account" name="aws_account" required placeholder="ex.: conta-prod, conta-dev ou ID 123456789012">
-        </div>
-        <div>
-          <label for="region">Região *</label>
-          <select id="region" name="region" required>
-            <option value="" disabled selected>Selecione</option>
-            <option value="sa-east-1">São Paulo (sa-east-1)</option>
-            <option value="us-east-1">Virgínia (us-east-1)</option>
-          </select>
-        </div>
-        <div>
-          <label for="expires_at">Data de remoção *</label>
-          <input id="expires_at" name="expires_at" type="date" required>
-        </div>
-        <div>
-          <label for="retention_days">Tempo de uso (dias)</label>
-          <input id="retention_days" name="retention_days" type="number" min="1" placeholder="ex.: 30">
-        </div>
-        <div>
-          <label for="estimated_cost">Custo estimado</label>
-          <input id="estimated_cost" name="estimated_cost" placeholder="ex.: USD 25/mês">
-        </div>
-        <div class="full">
-          <label for="params">Detalhes do recurso (texto livre)</label>
-          <textarea id="params" name="params" placeholder="Ex.: Snapshot do volume vol-123 tamanho 200GB, encrypted com KMS X."></textarea>
-        </div>
-        <div class="full">
-          <label for="tags">Tags principais (texto livre)</label>
-          <textarea id="tags" name="tags" placeholder="Owner=nome@empresa.com; CostCenter=CC123; Project=ProjetoX; ExpiresAt=2025-02-15"></textarea>
-        </div>
-        <div class="full">
-          <label><input id="auto_delete" name="auto_delete" type="checkbox"> Auto-delete permitido</label>
-        </div>
-        <div class="actions">
-          <button type="button" class="btn-secondary" id="reset-btn">Limpar</button>
-          <button type="submit" class="btn-primary">Enviar solicitação</button>
-        </div>
-        <div id="status" class="status" style="display:none;"></div>
-      </form>
-    </div>
+      <div class="layout-row">
+        <div class="filters-col" id="side-stack">
+          <div class="card" id="form-card">
+            <form id="request-form">
+              <div>
+                <label for="requester">Solicitante *</label>
+                <input id="requester" name="requester" required placeholder="nome@empresa.com">
+              </div>
+              <div>
+                <label for="service_type">Serviço *</label>
+                <select id="service_type" name="service_type" required></select>
+              </div>
+              <div>
+                <label for="aws_account">Conta AWS *</label>
+                <select id="aws_account" name="aws_account" required></select>
+              </div>
+              <div>
+                <label for="region">Região *</label>
+                <select id="region" name="region" required></select>
+              </div>
+              <div>
+                <label for="expires_at">Data de remoção *</label>
+                <input id="expires_at" name="expires_at" type="date" required>
+              </div>
+              <div>
+                <label for="retention_days">Tempo de uso (dias)</label>
+                <input id="retention_days" name="retention_days" type="number" min="1" placeholder="ex.: 30">
+              </div>
+              <div class="full">
+                <label for="params">Detalhes do recurso (texto livre)</label>
+                <textarea id="params" name="params" placeholder="Ex.: Snapshot do volume vol-123 tamanho 200GB, encrypted com KMS X."></textarea>
+              </div>
+              <div class="full">
+                <label for="tags">Tags principais (texto livre)</label>
+                <textarea id="tags" name="tags" placeholder="Owner=nome@empresa.com; CostCenter=CC123; Project=ProjetoX; ExpiresAt=2025-02-15"></textarea>
+              </div>
+              <div class="actions">
+                <button type="button" class="btn-secondary" id="reset-btn">Limpar</button>
+                <button type="submit" class="btn-primary">Enviar solicitação</button>
+              </div>
+              <div id="status" class="status" style="display:none;"></div>
+            </form>
+          </div>
 
-    <div class="card" style="margin-top:16px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-        <div style="font-weight:700;">Minhas solicitações</div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-          <input id="viewer" placeholder="Seu nome ou e-mail para filtrar" style="padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:var(--text);">
-          <select id="filter-status" style="padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:var(--text);">
-            <option value="">Status (todos)</option>
-            <option value="pendente">Pendente</option>
-            <option value="aprovado">Aprovado</option>
-            <option value="expirado">Expirado</option>
-            <option value="removido">Removido</option>
-          </select>
-          <input id="filter-exp-before" type="date" style="padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:var(--text);" title="Expira até">
-          <button type="button" class="btn-secondary" id="reload-btn" style="padding:8px 12px;">Recarregar</button>
+          <div class="card" id="filters-card" style="margin-top:16px;">
+            <div style="font-weight:700;margin-bottom:8px;">Filtros e busca</div>
+            <div class="filter-stack">
+              <input id="viewer" placeholder="Seu nome ou e-mail para filtrar" style="padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:var(--text);">
+              <input id="filter-id" placeholder="ID" style="padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:var(--text);width:100%;">
+              <input id="filter-account" placeholder="Conta" style="padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:var(--text);width:100%;">
+              <select id="filter-status" style="padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:var(--text);">
+                <option value="">Status (todos)</option>
+                <option value="pendente">Pendente</option>
+                <option value="aprovado">Aprovado</option>
+                <option value="expirado">Expirado</option>
+                <option value="removido">Removido</option>
+              </select>
+              <select id="filter-quick-exp" style="padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:var(--text);">
+                <option value="">Expira (todos)</option>
+                <option value="7">Expira em até 7 dias</option>
+                <option value="30">Expira em até 30 dias</option>
+              </select>
+              <input id="filter-exp-before" type="date" style="padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:var(--text);" title="Expira até">
+              <button type="button" class="btn-secondary" id="reload-btn" style="padding:10px 12px; width:100%;">Recarregar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="list-col">
+          <div class="card" id="list-card">
+            <div id="summary" class="summary-grid" style="display:none;"></div>
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+              <div>
+                <div id="requests-title" style="font-weight:700;">Minhas solicitações</div>
+                <div style="color:var(--muted);font-size:13px;">Histórico e aprovação</div>
+              </div>
+            </div>
+            <div id="list-status" class="status" style="display:none;"></div>
+            <div style="overflow-x:hidden; width:100%;">
+              <table id="requests-table" style="width:100%; border-collapse:collapse; font-size:14px; table-layout:auto;">
+                <thead>
+                  <tr style="text-align:left; color:var(--muted); border-bottom:1px solid rgba(255,255,255,0.08);">
+                    <th style="width:12%;">ID</th>
+                    <th style="width:14%;">Solicitante</th>
+                    <th style="width:12%;">Serviço</th>
+                    <th style="width:13%;">Conta</th>
+                    <th style="width:10%;">Região</th>
+                    <th style="width:10%;">Status</th>
+                    <th style="width:12%;">Expira em</th>
+                    <th style="width:8%;">Ações</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div id="pager" class="pager"></div>
+          </div>
         </div>
       </div>
-      <div id="list-status" class="status" style="display:none;"></div>
-      <div style="overflow:auto;">
-        <table id="requests-table" style="width:100%; border-collapse:collapse; font-size:14px; table-layout: fixed;">
-          <thead>
-            <tr style="text-align:left; color:var(--muted); border-bottom:1px solid rgba(255,255,255,0.08);">
-              <th style="width:12%;">ID</th>
-              <th style="width:18%;">Solicitante</th>
-              <th style="width:14%;">Serviço</th>
-              <th style="width:14%;">Conta</th>
-              <th style="width:10%;">Região</th>
-              <th style="width:12%;">Status</th>
-              <th style="width:12%;">Expira em</th>
-              <th style="width:18%;">Ações</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
     </div>
-    </div>
+    <div id="toast-container" class="toast-container"></div>
   </div>
 
   <div id="modal-overlay" class="modal-overlay">
     <div class="modal">
       <div class="modal-header">
-        <div class="modal-title">Detalhes da solicitação</div>
+        <div>
+          <div class="modal-title" id="detail-title">Detalhes da solicitação</div>
+          <div style="margin-top:6px;"><span class="chip" id="detail-status-chip"></span></div>
+        </div>
         <button class="modal-close" id="modal-close">&times;</button>
       </div>
       <div class="modal-body">
@@ -277,6 +324,7 @@
         <div class="detail-item"><span class="detail-label">Custo estimado</span> <span class="detail-value" id="detail-cost">-</span></div>
         <div class="detail-item"><span class="detail-label">Recurso</span> <span class="detail-value" id="detail-resource">-</span></div>
       </div>
+      <div id="modal-actions" class="modal-footer" style="padding:14px 20px; border-top:1px solid rgba(255,255,255,0.08); display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;"></div>
     </div>
   </div>
 
@@ -288,9 +336,16 @@
     const listStatus = document.getElementById('list-status');
     const tableBody = document.querySelector('#requests-table tbody');
     const viewerInput = document.getElementById('viewer');
+    const filterId = document.getElementById('filter-id');
+    const filterAccount = document.getElementById('filter-account');
     const filterStatus = document.getElementById('filter-status');
     const filterExpBefore = document.getElementById('filter-exp-before');
+    const filterQuickExp = document.getElementById('filter-quick-exp');
+    let serviceTypeSelect = document.getElementById('service_type');
+    let accountSelect = document.getElementById('aws_account');
+    let regionSelect = document.getElementById('region');
     const formCard = document.getElementById('form-card');
+    const filtersCard = document.getElementById('filters-card');
     const formNotice = document.createElement('div');
     formNotice.className = 'status';
     formNotice.style.display = 'none';
@@ -305,6 +360,7 @@
     const loginStatus = document.getElementById('login-status');
     const userInfo = document.getElementById('user-info');
     const protectedSection = document.getElementById('protected-section');
+    const sideStack = document.getElementById('side-stack');
     const userPanel = document.createElement('div');
     userPanel.className = 'card';
     userPanel.style.marginTop = '12px';
@@ -324,7 +380,7 @@
       </div>
       <div id="user-status" class="status" style="display:none;"></div>
     `;
-    protectedSection.appendChild(userPanel);
+    sideStack.appendChild(userPanel);
     const saveUserBtn = userPanel.querySelector('#save-user-btn');
     const newUsername = userPanel.querySelector('#new-username');
     const newPassword = userPanel.querySelector('#new-password');
@@ -338,6 +394,7 @@
     const detailTags = document.getElementById('detail-tags');
     const detailCost = document.getElementById('detail-cost');
     const detailResource = document.getElementById('detail-resource');
+    const summaryContainer = document.getElementById('summary');
     const importInput = document.createElement('input');
     importInput.type = 'file';
     importInput.accept = '.csv';
@@ -360,9 +417,108 @@
       listStatus.style.display = 'block';
     }
 
+    function toast(message, type='success', duration=3000) {
+      const container = document.getElementById('toast-container');
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.textContent = message;
+      container.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 300);
+      }, duration);
+    }
+
     function safeAttr(value) {
       if (!value) return '';
       return String(value).replace(/"/g, '&quot;');
+    }
+
+    function daysToExpiry(dateStr) {
+      if (!dateStr) return null;
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const target = new Date(dateStr);
+      target.setHours(0,0,0,0);
+      const diffMs = target - today;
+      return Math.round(diffMs / (1000 * 60 * 60 * 24));
+    }
+
+    function buildDataAttrs(item) {
+      return `data-id="${item.id}"
+        data-status="${item.status}"
+        data-idfull="${item.id}"
+        data-requester="${safeAttr(item.requester)}"
+        data-service="${safeAttr(item.service_type)}"
+        data-account="${safeAttr(item.aws_account || '-')}"
+        data-region="${safeAttr(item.region || '-')}"
+        data-exp="${safeAttr(item.expires_at)}"
+        data-params="${safeAttr(item.params || '')}"
+        data-tags="${safeAttr(item.tags || '')}"
+        data-cost="${safeAttr(item.estimated_cost || '')}"
+        data-resource="${safeAttr(item.resource_id || '')}"`;
+    }
+
+    async function loadMeta() {
+      const defaultsServices = ['ebs_snapshot','ec2','elb','s3','rds_snapshot','outro'];
+      const defaultsRegions = ['sa-east-1','us-east-1'];
+      try {
+        const data = await withAuth(async (token) => {
+          const res = await fetch('/api/meta', { headers: token ? { 'X-Auth-Token': token } : {} });
+          if (!res.ok) throw new Error('Erro ao carregar metadados');
+          return res.json();
+        });
+        populateSelect(serviceTypeSelect, (data.allowed_services && data.allowed_services.length ? data.allowed_services : defaultsServices), 'Selecione');
+        populateSelect(regionSelect, (data.allowed_regions && data.allowed_regions.length ? data.allowed_regions : defaultsRegions), 'Selecione');
+        if (data.allowed_accounts && data.allowed_accounts.length) {
+          populateSelect(accountSelect, data.allowed_accounts, 'Selecione');
+        } else {
+          const input = document.createElement('input');
+          input.id = 'aws_account';
+          input.name = 'aws_account';
+          input.required = true;
+          input.placeholder = 'Conta AWS';
+          input.style.padding = '10px 12px';
+          input.style.borderRadius = '10px';
+          input.style.border = '1px solid rgba(255,255,255,0.1)';
+          input.style.background = 'rgba(255,255,255,0.04)';
+          input.style.color = 'var(--text)';
+          accountSelect.replaceWith(input);
+          accountSelect = input;
+        }
+      } catch {
+        // fallback silencioso com defaults
+        populateSelect(serviceTypeSelect, defaultsServices, 'Selecione');
+        populateSelect(regionSelect, defaultsRegions, 'Selecione');
+        const input = document.createElement('input');
+        input.id = 'aws_account';
+        input.name = 'aws_account';
+        input.required = true;
+        input.placeholder = 'Conta AWS';
+        input.style.padding = '10px 12px';
+        input.style.borderRadius = '10px';
+        input.style.border = '1px solid rgba(255,255,255,0.1)';
+        input.style.background = 'rgba(255,255,255,0.04)';
+        input.style.color = 'var(--text)';
+        accountSelect.replaceWith(input);
+        accountSelect = input;
+      }
+    }
+
+    function populateSelect(selectEl, options, placeholder) {
+      selectEl.innerHTML = '';
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = placeholder;
+      opt.disabled = true;
+      opt.selected = true;
+      selectEl.appendChild(opt);
+      options.forEach((v) => {
+        const o = document.createElement('option');
+        o.value = v;
+        o.textContent = v;
+        selectEl.appendChild(o);
+      });
     }
 
     form.addEventListener('submit', async (e) => {
@@ -375,32 +531,43 @@
       }
 
       const payload = {
-        requester: form.requester.value,
         service_type: form.service_type.value,
         aws_account: form.aws_account.value,
         region: form.region.value,
         expires_at: form.expires_at.value,
         retention_days: form.retention_days.value ? Number(form.retention_days.value) : null,
-        estimated_cost: form.estimated_cost.value || null,
         params: form.params.value || null,
-        tags: form.tags.value || null,
-        auto_delete: form.auto_delete.checked
+        tags: form.tags.value || null
       };
 
-      await withAuth(async (token) => {
-        const res = await fetch('/api/requests', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-Auth-Token': token },
-          body: JSON.stringify(payload)
+      try {
+        await withAuth(async (token) => {
+          const res = await fetch('/api/requests', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Auth-Token': token },
+            body: JSON.stringify(payload)
+          });
+          if (!res.ok) {
+            let errMsg = 'Erro ao criar solicitação';
+            try {
+              const data = await res.json();
+              errMsg = data.detail || JSON.stringify(data);
+            } catch {
+              const text = await res.text();
+              if (text) errMsg = text;
+            }
+            throw new Error(errMsg);
+          }
+          const data = await res.json();
+          toast('Solicitação criada. ID: ' + data.id, 'success');
+          showStatus('Solicitação enviada para aprovação.', 'success');
+          form.reset();
         });
-        if (!res.ok) {
-          const text = await res.text();
-          throw new Error(text || 'Erro ao criar solicitação');
-        }
-        const data = await res.json();
-        showStatus('Solicitação criada com sucesso. ID: ' + data.id, 'success');
-        form.reset();
-      });
+      } catch (err) {
+        const msg = err && err.message ? err.message : 'Erro ao criar solicitação';
+        showStatus(msg, 'error');
+        toast(msg, 'error');
+      }
     });
 
     resetBtn.addEventListener('click', () => {
@@ -410,7 +577,14 @@
 
     reloadBtn.addEventListener('click', () => loadRequests(1));
     filterStatus.addEventListener('change', () => loadRequests(1));
-    filterExpBefore.addEventListener('change', () => loadRequests(1));
+    filterExpBefore.addEventListener('change', () => {
+      filterQuickExp.value = '';
+      loadRequests(1);
+    });
+    filterQuickExp.addEventListener('change', () => {
+      if (filterQuickExp.value) filterExpBefore.value = '';
+      loadRequests(1);
+    });
 
     viewerInput.addEventListener('change', () => {
       requesterFilter = viewerInput.value.trim();
@@ -429,7 +603,15 @@
         qs.set('page_size', 10);
         if (requesterFilter) qs.set('requester', requesterFilter);
         if (filterStatus.value) qs.set('status', filterStatus.value);
+        if (filterId.value) qs.set('id', filterId.value.trim());
+        if (filterAccount.value) qs.set('aws_account', filterAccount.value.trim());
         if (filterExpBefore.value) qs.set('expires_before', filterExpBefore.value);
+        if (filterQuickExp.value) {
+          const days = parseInt(filterQuickExp.value, 10);
+          const d = new Date();
+          d.setDate(d.getDate() + days);
+          qs.set('expires_before', d.toISOString().slice(0,10));
+        }
         const url = `/api/requests?${qs.toString()}`;
         const data = await withAuth(async (token) => {
           const res = await fetch(url, { headers: token ? { 'X-Auth-Token': token } : {} });
@@ -446,52 +628,65 @@
           const tr = document.createElement('tr');
           tr.style.borderBottom = '1px solid rgba(255,255,255,0.06)';
           const isAdmin = currentUser && currentUser.role === 'admin';
-          const actionsCell = isAdmin
-            ? `<div class="actions-row">
-                 <button data-id="${item.id}" class="action details btn-muted" data-params="${safeAttr(item.params || '')}" data-tags="${safeAttr(item.tags || '')}" data-cost="${safeAttr(item.estimated_cost || '')}" data-resource="${safeAttr(item.resource_id || '')}">Detalhes</button>
-                 <button data-id="${item.id}" class="action approve btn-approve">Aprovar</button>
-                 <button data-id="${item.id}" class="action expire btn-expire">Expirar</button>
-                 <button data-id="${item.id}" class="action remove btn-danger">Removido</button>
-               </div>`
-            : '-';
+          const statusChip = `<span class="chip ${item.status}">${item.status}</span>`;
+          const dataAttrs = buildDataAttrs(item);
+          const idLink = `<button class="id-link action open-modal" ${dataAttrs}>${item.id.slice(0,8)}</button>`;
+          const days = daysToExpiry(item.expires_at);
+          let slaLabel = '–';
+          let slaClass = 'far';
+          if (days !== null) {
+            if (days < 0) { slaLabel = `${Math.abs(days)}d atraso`; slaClass = 'late'; }
+            else if (days <= 7) { slaLabel = `${days}d`; slaClass = 'soon'; }
+            else if (days <= 30) { slaLabel = `${days}d`; slaClass = 'far'; }
+            else { slaLabel = '+30d'; slaClass = 'far'; }
+          }
+          const actionsCell = `<button class="sla-btn ${slaClass} action open-modal" ${dataAttrs}>${slaLabel}</button>`;
           tr.innerHTML = `
-            <td style="padding:8px;">${item.id.slice(0,8)}</td>
+            <td style="padding:8px;">${idLink}</td>
             <td>${item.requester}</td>
             <td>${item.service_type}</td>
             <td>${item.aws_account || '-'}</td>
             <td>${item.region || '-'}</td>
-            <td><span class="chip ${item.status}">${item.status}</span></td>
+            <td>${statusChip}</td>
             <td>${item.expires_at}</td>
             <td>${actionsCell}</td>
           `;
           tableBody.appendChild(tr);
         });
-        if (currentUser && currentUser.role === 'admin') {
-          attachActionHandlers();
-        }
+        attachActionHandlers();
         renderPagination(data.page, data.page_size, data.total);
       } catch (err) {
-        showListStatus(err.message, 'error');
+        toast(err.message, 'error');
+      }
+    }
+
+    async function loadSummary() {
+      if (!authToken || !currentUser || currentUser.role !== 'admin') {
+        summaryContainer.style.display = 'none';
+        return;
+      }
+      try {
+        const data = await withAuth(async (token) => {
+          const res = await fetch('/api/requests/summary', { headers: { 'X-Auth-Token': token } });
+          if (!res.ok) throw new Error('Erro ao carregar resumo');
+          return res.json();
+        });
+        summaryContainer.style.display = 'flex';
+        summaryContainer.innerHTML = `
+          <div class="summary-card"><div class="summary-title">Expira até 7d</div><div class="summary-value">${data.expiring_7}</div></div>
+          <div class="summary-card"><div class="summary-title">Expira até 30d</div><div class="summary-value">${data.expiring_30}</div></div>
+          <div class="summary-card"><div class="summary-title">Expirados</div><div class="summary-value">${data.expired_unremoved}</div></div>
+          <div class="summary-card"><div class="summary-title">Pendentes</div><div class="summary-value">${data.pending}</div></div>
+        `;
+      } catch (err) {
+        summaryContainer.style.display = 'none';
       }
     }
 
     function renderPagination(page, pageSize, total) {
       const totalPages = Math.max(1, Math.ceil(total / pageSize));
-      let pager = document.getElementById('pager');
-      if (!pager) {
-        pager = document.createElement('div');
-        pager.id = 'pager';
-        pager.style.display = 'flex';
-        pager.style.gap = '8px';
-        pager.style.marginTop = '12px';
-        pager.style.alignItems = 'center';
-        pager.style.justifyContent = 'flex-end';
-        const pagerContainer = document.createElement('div');
-        pagerContainer.style.display = 'flex';
-        pagerContainer.style.justifyContent = 'flex-end';
-        pagerContainer.appendChild(pager);
-        protectedSection.appendChild(pagerContainer);
-      }
+      const pager = document.getElementById('pager');
+      if (!pager) return;
       pager.innerHTML = '';
       const info = document.createElement('span');
       info.style.color = 'var(--muted)';
@@ -517,24 +712,26 @@
           if (confirm('Confirmar aprovação?')) updateStatus(btn.dataset.id, 'aprovado');
         };
       });
-      document.querySelectorAll('.action.expire').forEach(btn => {
-        btn.onclick = () => {
-          if (confirm('Confirmar expiração?')) expireRequest(btn.dataset.id);
-        };
-      });
-      document.querySelectorAll('.action.remove').forEach(btn => {
-        btn.onclick = () => {
-          const remover = prompt('Quem removeu? (nome ou email)');
-          if (remover) markRemoved(btn.dataset.id, remover);
-        };
-      });
       document.querySelectorAll('.action.details').forEach(btn => {
         btn.onclick = () => {
-          detailParams.textContent = btn.dataset.params || '-';
-          detailTags.textContent = btn.dataset.tags || '-';
-          detailCost.textContent = btn.dataset.cost || '-';
-          detailResource.textContent = btn.dataset.resource || '-';
-          modalOverlay.style.display = 'flex';
+          openDetail(btn);
+        };
+      });
+      document.querySelectorAll('.action.open-modal').forEach(btn => {
+        btn.onclick = () => openDetail(btn);
+      });
+      document.querySelectorAll('.action.delete').forEach(btn => {
+        btn.onclick = () => {
+          if (confirm('Remover definitivamente esta solicitação?')) {
+            deleteRequest(btn.dataset.id);
+          }
+        };
+      });
+      document.querySelectorAll('.action.cancel').forEach(btn => {
+        btn.onclick = () => {
+          if (confirm('Cancelar e remover sua solicitação?')) {
+            deleteRequest(btn.dataset.id);
+          }
         };
       });
     }
@@ -550,36 +747,66 @@
           if (!res.ok) throw new Error('Falha ao atualizar status');
         });
         await loadRequests();
+        toast('Status atualizado', 'success');
       } catch (err) {
-        showListStatus(err.message, 'error');
+        toast(err.message, 'error');
       }
     }
 
-    async function expireRequest(id) {
-      try {
-        await withAuth(async (token) => {
-          const res = await fetch(`/api/requests/${id}/expire`, { method: 'POST', headers: { 'X-Auth-Token': token || '' } });
-          if (!res.ok) throw new Error('Falha ao expirar');
-        });
-        await loadRequests();
-      } catch (err) {
-        showListStatus(err.message, 'error');
+    function openDetail(btn) {
+      detailParams.textContent = btn.dataset.params || '-';
+      detailTags.textContent = btn.dataset.tags || '-';
+      detailCost.textContent = btn.dataset.cost || '-';
+      detailResource.textContent = btn.dataset.resource || '-';
+      const status = btn.dataset.status || '-';
+      const idfull = btn.dataset.idfull || '-';
+      const chip = document.getElementById('detail-status-chip');
+      chip.className = `chip ${status}`;
+      chip.textContent = status;
+      document.getElementById('detail-title').textContent = `Solicitação ${idfull.slice(0,8)}`;
+
+      const modalActions = document.getElementById('modal-actions');
+      modalActions.innerHTML = '';
+      const id = btn.dataset.id;
+      const isAdmin = currentUser && currentUser.role === 'admin';
+      if (isAdmin) {
+        const approve = document.createElement('button');
+        approve.className = 'btn-primary';
+        approve.textContent = 'Aprovar';
+        approve.onclick = () => updateStatus(id, 'aprovado');
+        const remove = document.createElement('button');
+        remove.className = 'btn-danger';
+        remove.textContent = 'Remover';
+        remove.onclick = () => {
+          if (confirm('Remover definitivamente esta solicitação?')) deleteRequest(id);
+        };
+        modalActions.appendChild(approve);
+        modalActions.appendChild(remove);
+      } else {
+        const cancel = document.createElement('button');
+        cancel.className = 'btn-danger';
+        cancel.textContent = 'Cancelar';
+        cancel.onclick = () => {
+          if (confirm('Cancelar e remover sua solicitação?')) deleteRequest(id);
+        };
+        modalActions.appendChild(cancel);
       }
+      modalOverlay.style.display = 'flex';
     }
 
-    async function markRemoved(id, remover) {
+    async function deleteRequest(id) {
       try {
         await withAuth(async (token) => {
-          const res = await fetch(`/api/requests/${id}/mark-removed`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-Auth-Token': token || '' },
-            body: JSON.stringify({ remover })
-          });
-          if (!res.ok) throw new Error('Falha ao marcar removido');
+          const res = await fetch(`/api/requests/${id}`, { method: 'DELETE', headers: { 'X-Auth-Token': token || '' } });
+          if (!res.ok) {
+            const t = await res.text();
+            throw new Error(t || 'Falha ao excluir');
+          }
         });
         await loadRequests();
+        toast('Solicitação removida da lista', 'success');
       } catch (err) {
-        showListStatus(err.message, 'error');
+        toast(err.message, 'error');
       }
     }
 
@@ -602,16 +829,12 @@
             throw new Error(t || 'Erro ao criar usuário');
           }
         });
-        userStatus.textContent = 'Usuário criado.';
-        userStatus.className = 'status success';
-        userStatus.style.display = 'block';
+        toast('Usuário criado', 'success');
         newUsername.value = '';
         newPassword.value = '';
         newDisplay.value = '';
       } catch (err) {
-        userStatus.textContent = err.message;
-        userStatus.className = 'status error';
-        userStatus.style.display = 'block';
+        toast(err.message, 'error');
       }
     }
 
@@ -662,6 +885,8 @@
     requesterFilter = '';
     updateAuthUI();
     loadRequests();
+    loadMeta();
+    loadSummary();
 
     function clearSession() {
       authToken = null;
@@ -678,13 +903,15 @@
     loginBtn.addEventListener('click', () => {
       clearSession();
       updateAuthUI();
+      summaryContainer.style.display = 'none';
     });
 
     logoutBtn.addEventListener('click', () => {
       clearSession();
       updateAuthUI();
+      loadSummary();
     });
-    doLoginBtn.addEventListener('click', async () => {
+    async function handleLogin() {
       loginStatus.style.display = 'none';
       try {
         const res = await fetch('/api/auth/login', {
@@ -708,6 +935,20 @@
         loginStatus.className = 'status error';
         loginStatus.style.display = 'block';
       }
+    }
+
+    doLoginBtn.addEventListener('click', handleLogin);
+    loginPassword.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleLogin();
+      }
+    });
+    loginUsername.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleLogin();
+      }
     });
 
     function updateAuthUI() {
@@ -719,15 +960,16 @@
         protectedSection.style.display = 'block';
         loginPanel.style.display = 'none';
         if (currentUser.role === 'admin') {
-          formCard.querySelector('form').style.display = 'none';
-          formNotice.textContent = 'Admin não cria solicitações. Use os botões da lista para aprovar/gerir.';
-          formNotice.className = 'status error';
-          formNotice.style.display = 'block';
+          formCard.style.display = 'none';
           userPanel.style.display = 'block';
+          document.querySelector('#requests-title').textContent = 'Todas as solicitações';
+          filtersCard.style.display = 'block';
         } else {
+          formCard.style.display = 'block';
           formCard.querySelector('form').style.display = 'grid';
-          formNotice.style.display = 'none';
           userPanel.style.display = 'none';
+          document.querySelector('#requests-title').textContent = 'Minhas solicitações';
+          filtersCard.style.display = 'none';
         }
       } else {
         userInfo.textContent = '';
@@ -736,9 +978,11 @@
         logoutBtn.style.display = 'none';
         protectedSection.style.display = 'none';
         loginPanel.style.display = 'block';
+        formCard.style.display = 'block';
         formCard.querySelector('form').style.display = 'grid';
-        formNotice.style.display = 'none';
         userPanel.style.display = 'none';
+        filtersCard.style.display = 'none';
+        document.querySelector('#requests-title').textContent = 'Minhas solicitações';
       }
     }
 

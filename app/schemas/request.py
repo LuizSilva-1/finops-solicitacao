@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field, ConfigDict
 
 
 class RequestBase(BaseModel):
-    requester: str
+    requester: Optional[str] = None
     service_type: str
     params: Optional[str] = None
     cost_center: Optional[str] = None

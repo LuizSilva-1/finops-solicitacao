@@ -19,9 +19,10 @@ Login inicial: `admin / admin123`. Admin cria usuários e aprova/expira/removê 
 ## Configuração principal (env)
 - `DATABASE_URL`: já definido no compose para Postgres.
 - `SECRET_KEY`: troque para algo seguro.
-- `WEBHOOK_URL`: URL de webhook (Rocket.Chat/Slack/Teams).
+- `WEBHOOK_URL`: URL de webhook (Rocket.Chat/Slack/Teams). Ex.: `http://host.docker.internal:3000/hooks/69542b9dcf29bcbe18ea1091/rfuhDPpnfQzfrKTF7ZRWf6BhpPBGaR7WadeMjL7xesjQNdZf` (valor atual usado).
 - `WEBHOOK_CHANNEL` (opcional): canal do webhook.
 - `WEBHOOK_USERNAME` (opcional): nome do bot.
+- `ACCESS_TOKEN_EXP_MINUTES`, `REFRESH_TOKEN_EXP_DAYS`: expiração dos tokens JWT (padrão 30 min / 7 dias).
 - `ALLOWED_SERVICES`, `ALLOWED_REGIONS`, `MAX_EXPIRATION_DAYS`: configuráveis em `app/core/config.py` ou via env.
 
 ## Funcionalidades
@@ -49,3 +50,13 @@ docker compose run --rm app pytest
 ## Notas
 - Admin não cria solicitações; use-o para criar usuários e aprovar/gerir.
 - Para Rocket.Chat, defina `WEBHOOK_URL` e opcionalmente `WEBHOOK_CHANNEL`/`WEBHOOK_USERNAME`.
+- Teste rápido do webhook (de dentro do contêiner, apontando para Rocket.Chat no host):
+  ```bash
+  docker exec -it provisionamento-aws-app-1 sh -lc 'python - << "PY"
+import json, urllib.request
+url="http://host.docker.internal:3000/hooks/SEU_WEBHOOK_ID/SEU_TOKEN"
+data=json.dumps({"text":"Teste webhook (container -> host.docker.internal) ✅"}).encode("utf-8")
+req=urllib.request.Request(url=url, data=data, headers={"Content-Type":"application/json"}, method="POST")
+print(urllib.request.urlopen(req, timeout=10).read().decode())
+PY'
+  ```

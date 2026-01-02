@@ -8,8 +8,6 @@ from app import models
 from app.core.config import get_settings
 
 ALGO = "HS256"
-ACCESS_EXPIRE_MINUTES = 30
-REFRESH_EXPIRE_DAYS = 7
 
 
 def hash_password(password: str) -> str:
@@ -28,14 +26,14 @@ def create_tokens(user: models.user.User) -> Tuple[str, str]:
         "username": user.username,
         "role": user.role,
         "display_name": user.display_name,
-        "exp": now + timedelta(minutes=ACCESS_EXPIRE_MINUTES),
+        "exp": now + timedelta(minutes=settings.access_token_exp_minutes),
         "type": "access",
     }
     refresh_payload = {
         "sub": user.id,
         "username": user.username,
         "role": user.role,
-        "exp": now + timedelta(days=REFRESH_EXPIRE_DAYS),
+        "exp": now + timedelta(days=settings.refresh_token_exp_days),
         "type": "refresh",
     }
     access = jwt.encode(access_payload, settings.secret_key, algorithm=ALGO)

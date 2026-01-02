@@ -20,10 +20,14 @@ class Settings(BaseSettings):
     webhook_url: str | None = None
     webhook_channel: str | None = None
     webhook_username: str | None = None
+    allowed_accounts: list[str] = []
+    access_token_exp_minutes: int = 30
+    refresh_token_exp_days: int = 7
 
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
+        extra = "ignore"
 
 
 def get_settings() -> Settings:
